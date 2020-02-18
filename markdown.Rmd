@@ -44,13 +44,10 @@ library(data.table)
 
 
 ```{r}
-customers = read.csv('customers.csv')
 fragebogen = read.csv('fallstudie.csv')
 
-sum(is.na(customers))
 sum(is.na(fragebogen))
 
-str(customers)
 str(fragebogen)
 
 head(fragebogen)
@@ -114,11 +111,16 @@ head(fragebogen)
 install.packages('VIM')
 library(VIM)
 
+install.packages('class')
+library(class)
 
-## das ganze mit numeric_fragebogen probieren
-knn_fragebogen = kNN(fragebogen)
+# skalierung von 1-7 in einem df sc_1_7_fragebogen als knn_fragebogen gespeichert um fehlende Werte durch KNN zu ermitteln (Imputation)
+knn_fragebogen = kNN(sc_1_7_fragebogen)
 
-knn(fragebogen, variable = c(x,y))
+# zusätzlichen Spalten, die durch den algo knn erstellt wurden, droppen 
+knn_fragebogen = select(knn_fragebogen, -(f3_1_imp:f19_10_imp))
+
+#
 
 ```
 
@@ -129,12 +131,10 @@ knn(fragebogen, variable = c(x,y))
 contains_any_na = sapply(fragebogen, function(x) any(is.na(x)))
 column_names_na = names(fragebogen)[contains_any_na]
 
-
-## vektor der anzeigt wie viel Prozent NA pro Spalte vorhanden sind
+## df das anzeigt wie viel Prozent NA pro Spalte vorhanden sind
 perc_na = sapply(fragebogen, function(x) sum(is.na(x))/count(fragebogen))
-## per_na
-
-
+perc_na = as.data.frame(perc_na)
+perc_na
 ```
 
 ## Welche Spalten (Fragen) können wir ausschließen? 
@@ -143,10 +143,30 @@ Datenstruktur, dass diese Fragen als Factor spezifiziert sind. Wir müssen alle 
 
 ```{r}
 
-numeric_fragebogen = fragebogen[-str_detect(names(fragebogen), 'txt')]
+#drop von den Text Daten
 
-numeric_fragebogen = fragebogen[-robinsondf[,grep("txt",colnames(robinsondf))]]
+fragebogendt<-as.data.table(fragebogen)
+fragebogenneu<-fragebogendt[,grep("txt",colnames(fragebogendt))]
+fragebogenneu
+numericfragebogen<-fragebogen[-fragebogenneu]
 
-numeric_fragebogen = fragebogen[-str_detect(names(fragebogen), 'val')]
+
+num1 = numericfragebogen[-129]
+num2<-num1[-1:-2]
+num3<-num2[-127]
+num4<-num3[-122]
+num5<-num4[-100]
+
+# drop von denen dessen Normierung nicht 1-7 ist
+num6 <- num5
+num6$f1 <- NULL
+num6 <- select(num5, -(f20:f26))
+num6 <- select(num6, -(f11_2:f13_3))
+num6$f2 <- NULL
+num6 <- select(num6, -(f8:f11_1))
+
+# NEUER NAME: df mit ausschließlich ordinalen Skalierung mit der gleichen Normierung von 1-7
+sc_1_7_fragebogen = num6
+
 
 ```
