@@ -1,0 +1,150 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+# Zielformulierung: Ist die Einführung von Bionahrung beim Robinson Club aus betriebswirtschaftlicher Sicht strategisch sinvoll?
+
+## Fragestellungen:
+
+(1) Welchen Einfluss hat das Essen auf das Wohlbefinden der G ̈aste? (Stellen- wert des Essens im Vergleich zu den sonstigen Angeboten ROBINSONs)
+(2) IsteinAngebotvonBionahrungdenG ̈astenwichtig/erwu ̈nscht/erwartet? (Wichtigkeit von Bionahrung)
+(3) Was bedeutet Bio fu ̈r die G ̈aste? (Herausstellen der Elemente von Bion- ahrung und der Wichtigkeit dieser Elemente)
+(4) Sind die G ̈aste bereit fu ̈r ein Angebot von Bionahrung einen Aufschlag zu zahlen? (Preissensitivit ̈at der G ̈aste fu ̈r ein zus ̈atzliches Angebot von Bionahrung)
+(5) Wem genau ist das Angebot von Bionahrung wichtig? Wie unterscheiden sich diese Personen? (Zielgruppenidentifikation bezu ̈glich Bionahrung)
+(6) Bei welchen Lebensmittelarten ist das Angebot von Bio besonders wichtig /
+unwichtig? (Wichtigkeit von Bio bei unterschiedlichen Lebensmittelarten)
+(7) Welche Biosiegel sind den G ̈asten bekannt? (Bekanntheit Biosiegel)
+
+## Hypothesen:
+
+(1) Personen mit Kindern bevorzugen Bionahrung eher als Personen ohne Kinder. 
+(2) Robinson G ̈aste sind bereit fu ̈r Bionahrung einen Aufschlag zu zahlen.
+(3) Bionahrung besitzt das Potenzial ROBINSON als Marke zu st ̈arken.
+
+## Packages importieren 
+
+```{r}
+install.packages('tidyverse')
+library(tidyverse)
+
+install.packages('dplyr')
+library(dplyr)
+
+install.packages('data.table')
+library(data.table)
+
+```
+
+
+## Daten importieren und schnellen Überblick verschaffen
+
+
+```{r}
+customers = read.csv('customers.csv')
+fragebogen = read.csv('fallstudie.csv')
+
+sum(is.na(customers))
+sum(is.na(fragebogen))
+
+str(customers)
+str(fragebogen)
+
+head(fragebogen)
+```
+
+## CLEANING 
+
+### Umgang mit fehlenden Werten
+
+#### Drei verschiedene Arten von fehlenden Daten 
+
+1. Missing completely at random (MCAR):
+  Das Fehlen der Daten steht in keiner Beziehung zu den anderen Daten. Wenn man vorhersagen 
+  kann, welche Daten fehlen, dann kann man MCAR ausschließen. Das fehlen der Daten ist somit
+  komplett zufällig.
+
+2. Missing at random (MAR): 
+  Die Idee hinter dieser Art von fehlenden Daten ist, dass wir die fehlenden Daten 
+  vorhersagen können anhand des Datensets. 
+
+3. Missing not at random (nonignorable)
+  In diesem Fall können wir keine Aussage oder Prognose für die fehlenden Werte machen. Es 
+  ist weder MAR noch MCAR. 
+
+
+#### Drei verschiedene Methoden mit fehlenden Daten umzugehen:
+
+1.FEHLENDE DATEN LÖSCHEN  
+  Wenn NA's nur wenige (max 0,5 %) von Erhebung macht droppen Sinn, da einfach und 
+  Testergebnis nicht zu sehr verzerrt wird. na.omit() wäre der Code-Snippet. Dabei würde 
+  wenn überhaupt eine reihenweise Löschung Sinn machen, da wir für die Analyse eines 
+  Befragten die ganzen Werte brauchen. Dies führt allerdings zur Löschung 
+  des komplette Datensets. Somit kommt diese Methode für uns nicht in Frage.
+  
+2.FEHLENDEN DATEN MIT TEST STATISTIKEN FÜLLEN
+  Wenn mean() dann darf der prozentuale Anteil von NA's auch nicht so hoch sein (kann man 
+  hier einfach den Default Alpha Value nehmen?)
+  Es verringert die Varianz der Erhebungsdaten, da diese geglättet werden durch das 
+  arithemtische Mittel.
+  Extreme Ausreißer können den mean() zu stark beeinflussen und das Ergebniss verzerren. 
+  Hier sind die Zahlen       
+  kategorisch vorgegeben, somit kann es keine größeren Ausreißer geben. 
+  
+3.FEHLENDE DATEN MIT MACHINE LEARNING ALGORITHMEN BESTIMMEN
+  Ein Beispiel für ein einfach zu implementierenden Algorithmus wäre K-Means oder auch KNN 
+  genannt.
+  Idee hinter KNN: Die fehlenden Werte können mit den Werte die diesem Wert in einem 
+  zweidimensionalen Koordinatensystem am nähesten Liegen ermittelt werden. 
+  Kann sehr viel genauer sein als ein einfache means() und es ist sehr sensitiv was 
+  Outliers anbelangt. Allerdings
+  für uns könnten diese Methodik sehr interessant sein, da wir keine Ausreißer im 
+  klassischen Sinne haben können, da
+  die Range schon vorgegeben ist. Dieser Algorithmus kann für stetig und diskrete Daten 
+  genutzt werden.
+  
+## KNN Imputation
+
+
+```{r}
+
+install.packages('VIM')
+library(VIM)
+
+
+## das ganze mit numeric_fragebogen probieren
+knn_fragebogen = kNN(fragebogen)
+
+knn(fragebogen, variable = c(x,y))
+
+```
+
+## Welche Spalten sind von NA's betroffen?
+
+```{r}
+
+contains_any_na = sapply(fragebogen, function(x) any(is.na(x)))
+column_names_na = names(fragebogen)[contains_any_na]
+
+
+## vektor der anzeigt wie viel Prozent NA pro Spalte vorhanden sind
+perc_na = sapply(fragebogen, function(x) sum(is.na(x))/count(fragebogen))
+## per_na
+
+
+```
+
+## Welche Spalten (Fragen) können wir ausschließen? 
+Dabei können wir aus dem Fragebogen schon erkennen, das die Fragen 7,14,24 Text als Antwort haben. Des Weiteren sehen wir in der
+Datenstruktur, dass diese Fragen als Factor spezifiziert sind. Wir müssen alle Spalten exkludieren, welche auf 'txt' oder auf 'txt_val' enden. Diese Spalten müssen seperat betrachtet werden.  
+
+```{r}
+
+numeric_fragebogen = fragebogen[-str_detect(names(fragebogen), 'txt')]
+
+numeric_fragebogen = fragebogen[-robinsondf[,grep("txt",colnames(robinsondf))]]
+
+numeric_fragebogen = fragebogen[-str_detect(names(fragebogen), 'val')]
+
+```
