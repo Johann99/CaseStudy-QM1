@@ -175,6 +175,10 @@ sum(is.na(knn_fragebogen))
 
 # test ob Imputation statistisch erfolgreich
 
+# Zum visuellen Vergleich wie gut KNN Algo funkt hat
+plot(fragebogen$f4_11)
+#aufpassen da var erst im nächsten code chunk definiert wird
+plot(essen_wohlbefinden)
 
 
 
@@ -192,11 +196,7 @@ hist(essen_wohlbefinden)
 
 #Plot
 
-plot(essen_wohlbefinden)
 
-# Zum visuellen Vergleich wie gut KNN Algo funkt hat
-plot(fragebogen$f4_11)
-hist(fragebogen$f4_11)
 
 # Modalwert von den 14 verschiedenen Einflüssen Angeboten vergleichen 
 
