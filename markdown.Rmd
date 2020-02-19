@@ -184,9 +184,10 @@ sum(is.na(knn_fragebogen))
 
 # Zum visuellen Vergleich wie gut KNN Algo funkt hat
 plot(fragebogen$f4_11)
-#aufpassen da var erst im nächsten code chunk definiert wird
-essen_wohlbefinden = knn_fragebogen$f4_11
 plot(essen_wohlbefinden)
+
+essen_wohlbefinden = knn_fragebogen$f4_11
+
 
 
 
@@ -194,7 +195,10 @@ plot(essen_wohlbefinden)
 
 ## Frage 1: Welchen Einfluss hat das Essen auf das Wohlbefinden der Gäste? (Stellen- wert des Essens im Vergleich zu den sonstigen Angeboten ROBINSON
 ```{r}
-barplot(table(essen_wohlbefinden), main = "Wichtigkeit des Essens",xlab = "Wichtigkeit", ylab = "Anzahl der befragten Gäste", space = 1, cex.axis = 1, cex.names = 1, cex.lab = 1, cex.main = 1.5)
+KOMMENTAR
+#Prozentualer Anteil an Probanden, die Essen als Wichtig erachten 
+
+barplot(table(essen_wohlbefinden) , main = "Wichtigkeit des Essens",xlab = "Wichtigkeit", ylab = "Anzahl der befragten Gäste", space = 1, cex.axis = 1, cex.names = 1, cex.lab = 1, cex.main = 1.5)
 
 # Essen ist den befragten Gästen sehr wichitg
 MW4.1 <- mean(knn_fragebogen$f4_1)
@@ -229,6 +233,10 @@ barplot(table(essen_bionahrung), main = "Wichtigkeit von Bionahrung",xlab = "Wic
 **Bionahrung ist den Gästen wichtig**
 
 
+##F Frage 3: Was bedeutet Bio fu ̈r die G ̈aste? (Herausstellen der Elemente von Bion- ahrung und der Wichtigkeit dieser Elemente) 
+
+
+
 
 ## Frage 4: Sind die G ̈aste bereit fu ̈r ein Angebot von Bionahrung einen Aufschlag zu zahlen? (Preissensitivit ̈at der G ̈aste fu ̈r ein zus ̈atzliches Angebot von Bionahrung)
 
@@ -244,33 +252,45 @@ length(numericfragebogen$f17)
 #Wie viele n's? --> 100 
 count(price_sensitivity)
 
-#Wie viele würden mehr bezahlen? --> 66 Personen 
+#Wie viele würden überhaupt mehr bezahlen? --> 66 Personen 
 ps_0 = price_sensitivity[price_sensitivity>0, .N]
 
 #Wie viele würden mehr als 3 % bezahlen? --> 47 Personen
 ps_3 = price_sensitivity[price_sensitivity>3, .N]
+u_ps_3 = ps_3 * 0.03 
 
 
 #Wie viele würden mehr als 5 % bezahlen? --> 26 Personen
 ps_5 = price_sensitivity[price_sensitivity>5, .N]
+u_ps_5 = ps_5 * 0.05
 
 #Wie viele würden mehr als 10 % bezahlen? --> 7 Personen
 ps_10 = price_sensitivity[price_sensitivity>10, .N]
+u_ps_10 = ps_10 * 0.1
 
 #Wie viele würden mehr als 15 % bezahlen? --> 5 Personen
 ps_15 = price_sensitivity[price_sensitivity>15, .N]
+u_ps_15 = ps_15 * 0.15
 
 #Wie viele würden mehr als 20 % bezahlen? --> 2 Personen 
 ps_20 = price_sensitivity[price_sensitivity>20, .N]
+u_ps_20 = ps_20 * 0.2
 
 #Ergebnisse in einen Vektor packen
-all_ps = c(ps_0, ps_3, ps_5, ps_10, ps_15, ps_20)
+all_ps = c(ps_3, ps_5, ps_10, ps_15, ps_20)
+all_u_ps = c(u_ps_3,u_ps_5,u_ps_10,u_ps_15,u_ps_20)
 
 #barplot in absoluten Zahlen
 barplot(all_ps)
-
 #barplot in Prozenten, wir müssen davon ausgehen, dass diejenigen die nicht geantwortet haben, keinen Aufschlag zahlen würden
 barplot(all_ps/length(numericfragebogen$f17))
+
+#barplot Umsatz für jede Erhöhung --> Zeigt welche Prozenterhöhung sich lohnen würde wenn man die prozentuale Erhöhung und die Kaufbereitschaft der Kunden betrachtet
+barplot(all_u_ps)
+
+
+
+
 
 
 
