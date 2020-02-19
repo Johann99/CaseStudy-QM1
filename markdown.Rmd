@@ -37,6 +37,15 @@ library(dplyr)
 install.packages('data.table')
 library(data.table)
 
+install.packages('VIM')
+library(VIM)
+
+install.packages('class')
+library(class)
+
+install.packages("factoextra")
+library(factoextra)
+
 ```
 
 
@@ -116,6 +125,8 @@ column_names_na = names(fragebogen)[contains_any_na]
 perc_na = sapply(fragebogen, function(x) sum(is.na(x))/count(fragebogen))
 perc_na = as.data.frame(perc_na)
 perc_na
+
+
 ```
 
 ## Welche Spalten (Fragen) können wir ausschließen? 
@@ -157,12 +168,6 @@ sc_1_7_fragebogen = num6
 
 
 ```{r}
-install.packages('VIM')
-library(VIM)
-
-install.packages('class')
-library(class)
-
 # skalierung von 1-7 in einem df sc_1_7_fragebogen als knn_fragebogen gespeichert um fehlende Werte durch KNN zu ermitteln (Imputation)
 # k=sqrt(count(fragebogen)
 
@@ -190,6 +195,7 @@ plot(essen_wohlbefinden)
 ## Frage 1: Welchen Einfluss hat das Essen auf das Wohlbefinden der Gäste? (Stellen- wert des Essens im Vergleich zu den sonstigen Angeboten ROBINSON
 ```{r}
 barplot(table(essen_wohlbefinden), main = "Wichtigkeit des Essens",xlab = "Wichtigkeit", ylab = "Anzahl der befragten Gäste", space = 1, cex.axis = 1, cex.names = 1, cex.lab = 1, cex.main = 1.5)
+
 # Essen ist den befragten Gästen sehr wichitg
 MW4.1 <- mean(knn_fragebogen$f4_1)
 MW4.2 <- mean(knn_fragebogen$f4_2)
@@ -209,34 +215,66 @@ MW4.14 <- mean(knn_fragebogen$f4_14)
 MWVektorEssen <- c(MW4.1,MW4.2,MW4.3,MW4.4,MW4.5,MW4.6,MW4.7,MW4.8,MW4.9,MW4.10,MW4.11,MW4.12,MW4.13,MW4.14)
 barplot(MWVektorEssen, main = "Vergleich der Angebote",xlab = "Angebote", ylab = "Wichtigkeit", space = 1, cex.axis = 1, cex.names = 1, cex.lab = 1, cex.main = 1.5)
 ```
-# Angebot 11 (Essen) ist den befragten Gästen am wichtigsten im Vergleich zu dem restlichen Angebot
+
+**Angebot 11 (Essen) ist den befragten Gästen am wichtigsten im Vergleich zu dem restlichen Angebot**
+
 
 ## Frage 2: Ist ein Angebot von Bionahrung den Gästen wichtig/erwünscht/erwartet? (Wichtigkeit von Bionahrung)
 ```{r}
 essen_bionahrung = knn_fragebogen$f4_13
 barplot(table(essen_bionahrung), main = "Wichtigkeit von Bionahrung",xlab = "Wichtigkeit", ylab = "Anzahl der befragten Gäste", space = 1, cex.axis = 1, cex.names = 1, cex.lab = 1, cex.main = 1.5)
 ```
-# Bionahrung ist den Gästen wichtig
+
+
+**Bionahrung ist den Gästen wichtig**
+
+
+
+## Frage 4: Sind die G ̈aste bereit fu ̈r ein Angebot von Bionahrung einen Aufschlag zu zahlen? (Preissensitivit ̈at der G ̈aste fu ̈r ein zus ̈atzliches Angebot von Bionahrung)
 
 ```{r}
-essen_wohlbefinden = knn_fragebogen$f4_11
-
-# Ergebnis: Daten sind NICHT normalverteilt ?! 
-shapiro.test(essen_wohlbefinden) 
-hist(essen_wohlbefinden)
-
-#Plot
+price_sensitivity = numericfragebogen$f17 
+price_sensitivity = as.data.table(price_sensitivity)
+price_sensitivity = na.omit(price_sensitivity)
 
 
+#Wie viele n's vor dem droppen von NA Reihen? --> 219
+length(numericfragebogen$f17)
 
-# Modalwert von den 14 verschiedenen Einflüssen Angeboten vergleichen 
+#Wie viele n's? --> 100 
+count(price_sensitivity)
+
+#Wie viele würden mehr bezahlen? --> 66 Personen 
+ps_0 = price_sensitivity[price_sensitivity>0, .N]
+
+#Wie viele würden mehr als 3 % bezahlen? --> 47 Personen
+ps_3 = price_sensitivity[price_sensitivity>3, .N]
 
 
-# df aus den Werte machen und plotten 
+#Wie viele würden mehr als 5 % bezahlen? --> 26 Personen
+ps_5 = price_sensitivity[price_sensitivity>5, .N]
+
+#Wie viele würden mehr als 10 % bezahlen? --> 7 Personen
+ps_10 = price_sensitivity[price_sensitivity>10, .N]
+
+#Wie viele würden mehr als 15 % bezahlen? --> 5 Personen
+ps_15 = price_sensitivity[price_sensitivity>15, .N]
+
+#Wie viele würden mehr als 20 % bezahlen? --> 2 Personen 
+ps_20 = price_sensitivity[price_sensitivity>20, .N]
+
+#Ergebnisse in einen Vektor packen
+all_ps = c(ps_0, ps_3, ps_5, ps_10, ps_15, ps_20)
+
+#barplot in absoluten Zahlen
+barplot(all_ps)
+
+#barplot in Prozenten, wir müssen davon ausgehen, dass diejenigen die nicht geantwortet haben, keinen Aufschlag zahlen würden
+barplot(all_ps/length(numericfragebogen$f17))
+
 
 
 ```
-
 
 # Frage 5: Wem genau ist das Angebot von Bionahrung wichtig? Wie unterscheiden sich diese Personen? (Zielgruppenidentifikation bezüglich Bionahrung)
 
@@ -263,16 +301,12 @@ bio2 = select(bio2, -c(f24))
 
 
 
-install.packages("factoextra")
-library(factoextra)
-
-
-
 # das richtige K finden mit Elbow Method 
 
 
 
 ```
+
 
 
 ## Frage 6: Bei welchen Lebensmittelarten ist das Angebot von Bio besonders wichtig /unwichtig? (Wichtigkeit von Bio bei unterschiedlichen Lebensmittelarten)
@@ -292,40 +326,13 @@ MWVektorBionahrung <- c(MW16.1,MW16.2,MW16.3,MW16.4,MW16.5,MW16.6,MW16.7,MW16.8,
 
 barplot(MWVektorBionahrung, main = "Wichtigkeit von Bio bei unterschiedlichen Lebensmittelarten",xlab = "Lebensmittelkategorien", ylab = "Wichtigkeit", space = 1, cex.axis = 1, cex.names = 1, cex.lab = 1, cex.main = 1)
 ```
-Bei Gemüse & Salat (2), Obst (3) und Fleischprodukten (5) ist Bio für die Gäste wichtig. Bei Süßigkeiten (7), Gewürzen (8) und bei den Getränken (9) eher nicht.
+
+**Bei Gemüse & Salat (2), Obst (3) und Fleischprodukten (5) ist Bio für die Gäste wichtig. Bei Süßigkeiten (7), Gewürzen (8) und bei den Getränken (9) eher nicht.**
 
 
 
-## Frage 4: Sind die G ̈aste bereit fu ̈r ein Angebot von Bionahrung einen Aufschlag zu zahlen? (Preissensitivit ̈at der G ̈aste fu ̈r ein zus ̈atzliches Angebot von Bionahrung)
-
-```{r}
-price_sensitivity=numericfragebogen$f17 
-price_sensitivity = as.data.table(price_sensitivity)
-price_sensitivity = na.omit(price_sensitivity)
 
 
-#Wie viele n's? --> 100 
-count(price_sensitivity)
-
-#Wie viele würden mehr bezahlen? --> 66%
-price_sensitivity[price_sensitivity>0, .N]
-
-#Wie viele würden mehr als 5 % bezahlen? --> 26% 
-price_sensitivity[price_sensitivity>5, .N]
-
-#Wie viele würden mehr als 10 % bezahlen? --> 7% 
-price_sensitivity[price_sensitivity>10, .N]
-
-#Wie viele würden mehr als 15 % bezahlen? --> 5% 
-price_sensitivity[price_sensitivity>15, .N]
-
-#Wie viele würden mehr als 20 % bezahlen? --> 2% 
-price_sensitivity[price_sensitivity>20, .N]
-
-
-plot(price_sensitivity,type="p")
-
-```
 
 
 
