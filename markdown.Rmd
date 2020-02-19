@@ -150,13 +150,13 @@ num6 <- select(num6, -(f8:f11_1))
 sc_1_7_fragebogen = num6
 
 
+
 ```
 
 ## KNN Imputation
 
 
 ```{r}
-
 install.packages('VIM')
 library(VIM)
 
@@ -164,7 +164,9 @@ install.packages('class')
 library(class)
 
 # skalierung von 1-7 in einem df sc_1_7_fragebogen als knn_fragebogen gespeichert um fehlende Werte durch KNN zu ermitteln (Imputation)
-knn_fragebogen = kNN(sc_1_7_fragebogen)
+# k=sqrt(count(fragebogen)
+
+knn_fragebogen = kNN(sc_1_7_fragebogen,k=sqrt(count(fragebogen)))
 
 # zusätzlichen Spalten, die durch den algo knn erstellt wurden, droppen 
 knn_fragebogen = select(knn_fragebogen, -(f3_1_imp:f19_10_imp))
@@ -184,8 +186,36 @@ plot(essen_wohlbefinden)
 
 ```
 
-# Frage 1: Welchen Einfluss hat das Essen auf das Wohlbefinden der Gäste? (Stellen- wert des Essens im Vergleich zu den sonstigen Angeboten ROBINSONs) 
+## Frage 1: Welchen Einfluss hat das Essen auf das Wohlbefinden der Gäste? (Stellen- wert des Essens im Vergleich zu den sonstigen Angeboten ROBINSON
+```{r}
+barplot(table(essen_wohlbefinden), main = "Wichtigkeit des Essens",xlab = "Wichtigkeit", ylab = "Anzahl der befragten Gäste", space = 1, cex.axis = 1, cex.names = 1, cex.lab = 1, cex.main = 1.5)
+# Essen ist den befragten Gästen sehr wichitg
+MW4.1 <- mean(knn_fragebogen$f4_1)
+MW4.2 <- mean(knn_fragebogen$f4_2)
+MW4.3 <- mean(knn_fragebogen$f4_3)
+MW4.4 <- mean(knn_fragebogen$f4_4)
+MW4.5 <- mean(knn_fragebogen$f4_5)
+MW4.6 <- mean(knn_fragebogen$f4_6)
+MW4.7 <- mean(knn_fragebogen$f4_7)
+MW4.8 <- mean(knn_fragebogen$f4_8)
+MW4.9 <- mean(knn_fragebogen$f4_9)
+MW4.10 <- mean(knn_fragebogen$f4_10)
+MW4.11<- mean(knn_fragebogen$f4_11)
+MW4.12<- mean(knn_fragebogen$f4_12)
+MW4.13 <- mean(knn_fragebogen$f4_13)
+MW4.14 <- mean(knn_fragebogen$f4_14)
 
+MWVektorEssen <- c(MW4.1,MW4.2,MW4.3,MW4.4,MW4.5,MW4.6,MW4.7,MW4.8,MW4.9,MW4.10,MW4.11,MW4.12,MW4.13,MW4.14)
+barplot(MWVektorEssen, main = "Vergleich der Angebote",xlab = "Angebote", ylab = "Wichtigkeit", space = 1, cex.axis = 1, cex.names = 1, cex.lab = 1, cex.main = 1.5)
+```
+# Angebot 11 (Essen) ist den befragten Gästen am wichtigsten im Vergleich zu dem restlichen Angebot
+
+## Frage 2: Ist ein Angebot von Bionahrung den Gästen wichtig/erwünscht/erwartet? (Wichtigkeit von Bionahrung)
+```{r}
+essen_bionahrung = knn_fragebogen$f4_13
+barplot(table(essen_bionahrung), main = "Wichtigkeit von Bionahrung",xlab = "Wichtigkeit", ylab = "Anzahl der befragten Gäste", space = 1, cex.axis = 1, cex.names = 1, cex.lab = 1, cex.main = 1.5)
+```
+# Bionahrung ist den Gästen wichtig
 
 ```{r}
 essen_wohlbefinden = knn_fragebogen$f4_11
@@ -205,3 +235,63 @@ hist(essen_wohlbefinden)
 
 
 ```
+
+
+# Frage 5: Wem genau ist das Angebot von Bionahrung wichtig? Wie unterscheiden sich diese Personen? (Zielgruppenidentifikation bezüglich Bionahrung)
+
+```{r}
+
+# Annahme: Ab 3 oder kleiner ist Bio für die Probanden wichtig 
+#data.table(knn_fragebogen)
+#bio = knn_fragebogen$f4_13
+#bio_wichtig = bio[bio<=3]
+#bio_wichtig = as.data.table(bio_wichtig)
+
+
+# Leute die Bio mögen und und Demografische Daten
+bio2 = numericfragebogen[numericfragebogen$f4_13<3,]
+bio2 = select(bio2, -c(f3_1:f6_9))
+bio2 = select(bio2, -c(f15_1:f19_10))
+bio2 = select(bio2, -c(f8:f13_3))
+#nicht brauchbar 
+bio2 = select(bio2, -c(ID:Ort))
+bio2 = select(bio2, -c(f23_4))
+#niemand hat das alter seines/ihres 4. Kindes angegeben
+bio2 = select(bio2, -c(f24))
+
+
+
+
+install.packages("factoextra")
+library(factoextra)
+
+
+
+# das richtige K finden mit Elbow Method 
+
+
+
+```
+
+
+## Frage 6: Bei welchen Lebensmittelarten ist das Angebot von Bio besonders wichtig /unwichtig? (Wichtigkeit von Bio bei unterschiedlichen Lebensmittelarten)
+```{r}
+MW16.1 <- mean(knn_fragebogen$f16_1)
+MW16.2 <- mean(knn_fragebogen$f16_2)
+MW16.3 <- mean(knn_fragebogen$f16_3)
+MW16.4 <- mean(knn_fragebogen$f16_4)
+MW16.5 <- mean(knn_fragebogen$f16_5)
+MW16.6 <- mean(knn_fragebogen$f16_6)
+MW16.7 <- mean(knn_fragebogen$f16_7)
+MW16.8 <- mean(knn_fragebogen$f16_8)
+MW16.9 <- mean(knn_fragebogen$f16_9)
+
+MWVektorBionahrung <- c(MW16.1,MW16.2,MW16.3,MW16.4,MW16.5,MW16.6,MW16.7,MW16.8,MW16.9)
+
+
+barplot(MWVektorBionahrung, main = "Wichtigkeit von Bio bei unterschiedlichen Lebensmittelarten",xlab = "Lebensmittelkategorien", ylab = "Wichtigkeit", space = 1, cex.axis = 1, cex.names = 1, cex.lab = 1, cex.main = 1)
+```
+# Bei Gemüse & Salat (2), Obst (3) und Fleischprodukten (5) ist Bio für die Gäste wichtig. Bei Süßigkeiten (7), Gewürzen (8) und bei den Getränken (9) eher nicht.
+
+
+
