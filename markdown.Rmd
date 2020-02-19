@@ -180,6 +180,7 @@ sum(is.na(knn_fragebogen))
 # Zum visuellen Vergleich wie gut KNN Algo funkt hat
 plot(fragebogen$f4_11)
 #aufpassen da var erst im nächsten code chunk definiert wird
+essen_wohlbefinden = knn_fragebogen$f4_11
 plot(essen_wohlbefinden)
 
 
@@ -291,7 +292,40 @@ MWVektorBionahrung <- c(MW16.1,MW16.2,MW16.3,MW16.4,MW16.5,MW16.6,MW16.7,MW16.8,
 
 barplot(MWVektorBionahrung, main = "Wichtigkeit von Bio bei unterschiedlichen Lebensmittelarten",xlab = "Lebensmittelkategorien", ylab = "Wichtigkeit", space = 1, cex.axis = 1, cex.names = 1, cex.lab = 1, cex.main = 1)
 ```
-# Bei Gemüse & Salat (2), Obst (3) und Fleischprodukten (5) ist Bio für die Gäste wichtig. Bei Süßigkeiten (7), Gewürzen (8) und bei den Getränken (9) eher nicht.
+Bei Gemüse & Salat (2), Obst (3) und Fleischprodukten (5) ist Bio für die Gäste wichtig. Bei Süßigkeiten (7), Gewürzen (8) und bei den Getränken (9) eher nicht.
+
+
+
+## Frage 4: Sind die G ̈aste bereit fu ̈r ein Angebot von Bionahrung einen Aufschlag zu zahlen? (Preissensitivit ̈at der G ̈aste fu ̈r ein zus ̈atzliches Angebot von Bionahrung)
+
+```{r}
+price_sensitivity=numericfragebogen$f17 
+price_sensitivity = as.data.table(price_sensitivity)
+price_sensitivity = na.omit(price_sensitivity)
+
+
+#Wie viele n's? --> 100 
+count(price_sensitivity)
+
+#Wie viele würden mehr bezahlen? --> 66%
+price_sensitivity[price_sensitivity>0, .N]
+
+#Wie viele würden mehr als 5 % bezahlen? --> 26% 
+price_sensitivity[price_sensitivity>5, .N]
+
+#Wie viele würden mehr als 10 % bezahlen? --> 7% 
+price_sensitivity[price_sensitivity>10, .N]
+
+#Wie viele würden mehr als 15 % bezahlen? --> 5% 
+price_sensitivity[price_sensitivity>15, .N]
+
+#Wie viele würden mehr als 20 % bezahlen? --> 2% 
+price_sensitivity[price_sensitivity>20, .N]
+
+
+plot(price_sensitivity,type="p")
+
+```
 
 
 
