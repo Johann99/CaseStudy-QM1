@@ -103,26 +103,7 @@ head(fragebogen)
   die Range schon vorgegeben ist. Dieser Algorithmus kann für stetig und diskrete Daten 
   genutzt werden.
   
-## KNN Imputation
 
-
-```{r}
-
-install.packages('VIM')
-library(VIM)
-
-install.packages('class')
-library(class)
-
-# skalierung von 1-7 in einem df sc_1_7_fragebogen als knn_fragebogen gespeichert um fehlende Werte durch KNN zu ermitteln (Imputation)
-knn_fragebogen = kNN(sc_1_7_fragebogen)
-
-# zusätzlichen Spalten, die durch den algo knn erstellt wurden, droppen 
-knn_fragebogen = select(knn_fragebogen, -(f3_1_imp:f19_10_imp))
-
-#
-
-```
 
 ## Welche Spalten sind von NA's betroffen?
 
@@ -167,6 +148,60 @@ num6 <- select(num6, -(f8:f11_1))
 
 # NEUER NAME: df mit ausschließlich ordinalen Skalierung mit der gleichen Normierung von 1-7
 sc_1_7_fragebogen = num6
+
+
+```
+
+## KNN Imputation
+
+
+```{r}
+
+install.packages('VIM')
+library(VIM)
+
+install.packages('class')
+library(class)
+
+# skalierung von 1-7 in einem df sc_1_7_fragebogen als knn_fragebogen gespeichert um fehlende Werte durch KNN zu ermitteln (Imputation)
+knn_fragebogen = kNN(sc_1_7_fragebogen)
+
+# zusätzlichen Spalten, die durch den algo knn erstellt wurden, droppen 
+knn_fragebogen = select(knn_fragebogen, -(f3_1_imp:f19_10_imp))
+knn_fragebogen = select(knn_fragebogen, -(f1_imp))
+
+# double check ob auch wirklich alle NA's imputiert wurden
+sum(is.na(knn_fragebogen))
+
+# test ob Imputation statistisch erfolgreich
+
+
+
+
+```
+
+# Frage 1: Welchen Einfluss hat das Essen auf das Wohlbefinden der Gäste? (Stellen- wert des Essens im Vergleich zu den sonstigen Angeboten ROBINSONs) 
+
+
+```{r}
+essen_wohlbefinden = knn_fragebogen$f4_11
+
+# Ergebnis: Daten sind NICHT normalverteilt ?! 
+shapiro.test(essen_wohlbefinden) 
+hist(essen_wohlbefinden)
+
+#Plot
+
+plot(essen_wohlbefinden)
+
+# Zum visuellen Vergleich wie gut KNN Algo funkt hat
+plot(fragebogen$f4_11)
+hist(fragebogen$f4_11)
+
+# Modalwert von den 14 verschiedenen Einflüssen Angeboten vergleichen 
+
+
+# df aus den Werte machen und plotten 
 
 
 ```
