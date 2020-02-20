@@ -183,10 +183,12 @@ sum(is.na(knn_fragebogen))
 # test ob Imputation statistisch erfolgreich
 
 # Zum visuellen Vergleich wie gut KNN Algo funkt hat
+
+essen_wohlbefinden = knn_fragebogen$f4_11
 plot(fragebogen$f4_11)
 plot(essen_wohlbefinden)
 
-essen_wohlbefinden = knn_fragebogen$f4_11
+
 
 
 
@@ -195,7 +197,7 @@ essen_wohlbefinden = knn_fragebogen$f4_11
 
 ## Frage 1: Welchen Einfluss hat das Essen auf das Wohlbefinden der Gäste? (Stellen- wert des Essens im Vergleich zu den sonstigen Angeboten ROBINSON
 ```{r}
-KOMMENTAR
+#KOMMENTAR
 #Prozentualer Anteil an Probanden, die Essen als Wichtig erachten 
 
 barplot(table(essen_wohlbefinden) , main = "Wichtigkeit des Essens",xlab = "Wichtigkeit", ylab = "Anzahl der befragten Gäste", space = 1, cex.axis = 1, cex.names = 1, cex.lab = 1, cex.main = 1.5)
@@ -233,7 +235,7 @@ barplot(table(essen_bionahrung), main = "Wichtigkeit von Bionahrung",xlab = "Wic
 **Bionahrung ist den Gästen wichtig**
 
 
-##F Frage 3: Was bedeutet Bio fu ̈r die G ̈aste? (Herausstellen der Elemente von Bion- ahrung und der Wichtigkeit dieser Elemente) 
+## Frage 3: Was bedeutet Bio fu ̈r die G ̈aste? (Herausstellen der Elemente von Bion- ahrung und der Wichtigkeit dieser Elemente) 
 
 
 
@@ -348,6 +350,190 @@ barplot(MWVektorBionahrung, main = "Wichtigkeit von Bio bei unterschiedlichen Le
 ```
 
 **Bei Gemüse & Salat (2), Obst (3) und Fleischprodukten (5) ist Bio für die Gäste wichtig. Bei Süßigkeiten (7), Gewürzen (8) und bei den Getränken (9) eher nicht.**
+
+
+
+
+# Hypothesen 
+
+## 1 Hypothese: Personen mit Kindern bevorzugen Bionahrung eher als Personen ohne Kinder.
+
+H0: Personen mit Kindern bevorzugen Bionahrung nicht eher als Personen ohne Kinder.
+H1: Personen mit Kindern bevorzugen Bionahrung eher als Personen ohne Kinder.
+
+```{r}
+#Wie kommen wir an alle Personen die Kinder haben? --> Frage 2.3 sehr passend da bei der niedrigen prozentualen Anzahl an fehlenden Werten Reihen gedropped werden können.
+
+# Annahme: Wer mit Familie kommt, kommt auch mit Kindern
+
+# Frage 9
+preferences_bio = as.data.table(fragebogen$f9)
+
+
+# Frage 2
+bio_children = as.data.table(fragebogen$f2)
+#replacing 0 with NA
+bio_children[bio_children == 0] <- NA
+
+#datasets verbinden 
+merge_p_b = cbind(bio_children, preferences_bio)
+#Spalten Namen ändern
+colnames(merge_p_b) = c('bio_children','preferences_bio')
+
+#wie viele NA's pro Spalte? 
+perc_na$f9.n #0.04 % NA
+perc_na$f2.n #keine NA
+
+#es kann bei so einer geringen Anzahl an NA's Reihen gedroped werden 
+merge_p_b_na = na.omit(merge_p_b)
+
+
+#filtern nach denen die bio mögen
+#bio_mögen_u.kinder = merge_p_b_na[merge_p_b_na$preferences_bio < 3 & merge_p_b_na$bio_children == 3]
+
+####################
+
+#Kinder neu definiert
+
+kinder_bio_all = cbind(fragebogen$f23_1, fragebogen$f23_2, fragebogen$f23_3, fragebogen$f23_4, preferences_bio)
+# neue spalte die zählt wie viele NA pro Reihe
+kinder_bio_all$na_count <- apply(kinder_bio_all, 1, function(x) sum(is.na(x)))
+
+kinder_bio_all =  as.data.table(kinder_bio_all) 
+colnames(kinder_bio_all) = c('1Ki','2Ki','3Ki','4Ki','bio','na_count')
+
+
+
+# definiert df mit und ohne Kinder
+# keine_kinder_mögen = kinder_bio_all[kinder_bio_all$na_count==4 & kinder_bio_all$bio < 3]
+# keine_kinder_n_mögen = kinder_bio_all[kinder_bio_all$na_count==4 & kinder_bio_all$bio > 2]
+
+# kinder und keine kinder und dann mittelwert von bio ermitteln 
+keine_kinder = kinder_bio_all[kinder_bio_all$na_count==4]
+kinder = kinder_bio_all[kinder_bio_all$na_count!=4]
+
+# drop na und dt erstellen
+kinder_bio = as.data.table(kinder$bio)
+kinder_bio = na.omit(kinder$bio)
+
+keine_kinder_bio = as.data.table(keine_kinder$bio)
+
+
+# mittelwert ermitteln 
+mean_k_b = mean(kinder_bio) 
+mean_kk_b = mean(data.matrix(keine_kinder_bio)) #mean funktioniert nicht immer mit dt
+
+# t.test durchführen
+t.test(kinder_bio, keine_kinder_bio)
+
+#--> Können H0 nicht verwerfen da p.value > alpha deshalb müssen wir bei der H0 hypo bleiben
+
+
+```
+
+
+
+
+
+
+
+## 2 Hypothese: Robinson G ̈aste sind bereit fu ̈r Bionahrung einen Aufschlag zu zahlen
+
+
+
+
+
+## 3 Hypothese: Bionahrung besitzt das Potenzial ROBINSON als Marke zu st ̈arken.
+
+Was verbinden die Kunden mit der Marken Robinson?
+
+```{r}
+#für marke robinson relevanten spalten zusammenführen 
+marke_robinson = cbind(knn_fragebogen$f3_1,knn_fragebogen$f3_2,knn_fragebogen$f3_3,knn_fragebogen$f3_4,knn_fragebogen$f3_5,knn_fragebogen$f3_6,knn_fragebogen$f3_7,knn_fragebogen$f3_8,knn_fragebogen$f3_9,knn_fragebogen$f3_10, knn_fragebogen$f3_11)
+
+#mean ausrechnen 
+col_means_r=colMeans(marke_robinson)
+
+#plot 
+plot(col_means_r)
+
+#weiteren Wert in Betracht ziehen: Modalwert 
+## mode function definieren 
+modefunc <- function(x){
+    tabresult <- tabulate(x)
+    themode <- which(tabresult == max(tabresult))
+    if(sum(tabresult == max(tabresult))>1) themode <- NA
+    return(themode)
+}
+
+#columns
+col_mode_r = apply(marke_robinson, 2, modefunc)
+
+#plot
+plot(col_mode_r)
+
+
+
+
+
+```
+
+
+Was verbinden die Kunden mit der 'Marke' Bio?
+
+```{r}
+#für marke robinson relevanten spalten zusammenführen 
+marke_bio = cbind(knn_fragebogen$f15_1,knn_fragebogen$f15_2,knn_fragebogen$f15_3,knn_fragebogen$f15_4,knn_fragebogen$f15_5,knn_fragebogen$f15_6,knn_fragebogen$f15_7,knn_fragebogen$f15_8,knn_fragebogen$f15_9,knn_fragebogen$f15_10, knn_fragebogen$f15_11,knn_fragebogen$f15_12,knn_fragebogen$f15_13,knn_fragebogen$f15_14,knn_fragebogen$f15_15,knn_fragebogen$f15_16)
+
+#mean ausrechnen 
+col_means_b=colMeans(marke_bio)
+
+#plot 
+plot(col_means_b)
+
+#weiteren Wert in Betracht ziehen: Modalwert 
+
+#columns
+col_mode_b = apply(marke_bio, 2, modefunc)
+
+#plot
+plot(col_mode_b)
+
+
+
+
+```
+
+Welche Attribute lassen einen Vergleich zu? 
+
+Gutes Preis- / Leistungsverhältnis: f3_1 = f15_16
+Umfassendes Wohlfühlangebot: f3_2 = f15_8
+Sportlichkeit: f3_3 = f15_6
+Kinderfreundlichkeit: f3_4 = NA
+Hochwertiges Speisenangebot: f3_5 = f15_4
+Abwechslungsreiches Speisenangebot: f3_6 = f15_5
+Einzigartigkeit: f3_7 = f15_7 (Individualität) ??
+Hohe Qualität: f3_8 = NA
+Gesundheit: f3_9 = f15_3
+Im Trend: f3_10 = f15_9
+Genuss: f3_11 = f15_12
+
+```{r}
+vergleichs_matrix = cbind(col_means_r[1],col_means_b[16], 
+                          col_means_r[2], col_means_b[8], 
+                          col_means_r[3], col_means_b[6],
+                          col_means_r[5], col_means_b[4],
+                          col_means_r[6], col_means_b[5],
+                          col_means_r[7], col_means_b[7],
+                          col_means_r[9], col_means_b[3],
+                          col_means_r[10], col_means_b[9],
+                          col_means_r[11], col_means_b[12])
+
+
+
+```
+
+
 
 
 
