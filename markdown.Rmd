@@ -237,6 +237,57 @@ barplot(table(essen_bionahrung), main = "Wichtigkeit von Bionahrung",xlab = "Wic
 
 ## Frage 3: Was bedeutet Bio fu ̈r die G ̈aste? (Herausstellen der Elemente von Bion- ahrung und der Wichtigkeit dieser Elemente) 
 
+```{r}
+bedeutung_bio = cbind(knn_fragebogen$f15_1,
+                      knn_fragebogen$f15_2,
+                      knn_fragebogen$f15_3,
+                      knn_fragebogen$f15_4,
+                      knn_fragebogen$f15_5,
+                      knn_fragebogen$f15_6,
+                      knn_fragebogen$f15_7,
+                      knn_fragebogen$f15_8,
+                      knn_fragebogen$f15_9,
+                      knn_fragebogen$f15_10,
+                      knn_fragebogen$f15_11,
+                      knn_fragebogen$f15_12,
+                      knn_fragebogen$f15_13,
+                      knn_fragebogen$f15_14,
+                      knn_fragebogen$f15_15,
+                      knn_fragebogen$f15_16)
+
+bedeutung_bio_names = c('Guter Geschmack',
+                        'Frische und Reife',
+                        'Gesundheitsbewusste Ernährung',
+                        'Hochwertige Nahrung',
+                        'Abwechslungsreiche Nahrung',
+                        'Sportlichkeit',
+                        'Individualität',
+                        'Wohlfühlen',
+                        'Im Trend',
+                        'Naturbelassenheit',
+                        'Regionale Herkunft',
+                        'Genuss',
+                        'artgerechte Tierhaltung',
+                        'Auschluss von Gentechnik',
+                        'geprüfte Qualität',
+                        'Gutes Preis-/Leistungsverhältnis')
+
+bedeutung_bio = as.data.table(bedeutung_bio)
+colnames(bedeutung_bio) <- bedeutung_bio_names
+
+# mittelwerte der einzelnen Attribute bilden
+bedeutung_bio_means = colMeans(bedeutung_bio) 
+
+#plot
+plot(bedeutung_bio_means)
+
+# starke Assoziation mit Mittelwert kleiner gleich 2
+
+
+
+```
+
+
 
 
 
