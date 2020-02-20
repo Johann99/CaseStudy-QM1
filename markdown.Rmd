@@ -456,6 +456,9 @@ hist(aufschlag_abschrecken)
 # t.test für statistischen Nachweis
 t.test(bio_aufschlag, aufschlag_abschrecken)
 
+# weitere Möglichkeit: einseitiger t.test wo 4 als neutral gilt
+t.test(bio_aufschlag, mu = 4, alternative = 'less')
+# --> p.value<alpha 
 
 
 
