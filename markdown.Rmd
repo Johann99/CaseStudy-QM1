@@ -440,6 +440,35 @@ t.test(kinder_bio, keine_kinder_bio)
 ## 2 Hypothese: Robinson G ̈aste sind bereit fu ̈r Bionahrung einen Aufschlag zu zahlen
 
 
+```{r}
+# daten und var spezifizieren 
+bio_aufschlag = knn_fragebogen$f18_2
+
+#plot --> Erkennbar dass Bereitschaft da wäre
+hist(bio_aufschlag)
+
+
+# daten und var spezifizieren 
+aufschlag_abschrecken = knn_fragebogen$f18_9
+#plot
+hist(aufschlag_abschrecken)
+
+# t.test für statistischen Nachweis
+t.test(bio_aufschlag, aufschlag_abschrecken)
+
+
+
+
+
+
+
+
+
+
+```
+
+
+
 
 
 
@@ -471,9 +500,6 @@ col_mode_r = apply(marke_robinson, 2, modefunc)
 
 #plot
 plot(col_mode_r)
-
-
-
 
 
 ```
@@ -519,6 +545,7 @@ Im Trend: f3_10 = f15_9
 Genuss: f3_11 = f15_12
 
 ```{r}
+# vergleichsdaten zusammenführen 
 vergleichs_matrix = cbind(col_means_r[1],col_means_b[16], 
                           col_means_r[2], col_means_b[8], 
                           col_means_r[3], col_means_b[6],
@@ -531,9 +558,38 @@ vergleichs_matrix = cbind(col_means_r[1],col_means_b[16],
 
 
 
+#vergleichsmatrix plotten
+barplot(vergleichs_matrix)
+
 ```
 
 
+
+
+
+
+
+
+
+
+
+# Weitere Datenanalysen  
+
+```{r}
+# besteht überhaupt ein Bedarf an weiteren Gütesiegeln?
+bedarf_an_gs = knn_fragebogen$f18_4
+
+#hist
+hist(bedarf_an_gs)
+
+# einseitiger t.test 
+t.test(bedarf_an_gs, mu = 4, alternative = 'less')
+
+#p.value < alpha --> signifikanter Bedarf an Gütesiegeln
+
+
+
+```
 
 
 
