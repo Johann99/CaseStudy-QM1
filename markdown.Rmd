@@ -121,7 +121,7 @@ Für die Fragen mit einer Normierung von 1-7 werden wir eine KNN-Imputation durc
 
 ## Welche Spalten sind von NA's betroffen?
 
-Durch die prozentuale Berechnung der NA's pro Spalte, verschaffen wir uns einen Überblick über die fehlenden NA's und haben direkt ein gutes Fundament, welches uns hilt zu entscheiden wie wir mit den fehlenden Werten umgehen können.
+Durch die prozentuale Berechnung der NA's pro Spalte, verschaffen wir uns einen Überblick über die fehlenden NA's und haben direkt ein gutes Fundament, welches uns hilft zu entscheiden wie wir mit den fehlenden Werten umgehen können.
 
 ```{r}
 
@@ -184,7 +184,8 @@ sum(is.na(knn_fragebogen))
 
 # test ob Imputation statistisch erfolgreich
 
-# Zum visuellen Vergleich wie gut KNN Algo funkt hat
+# Zum visuellen Vergleich wie gut KNN Algo funktioniert hat
+#mit ~ 1,3 % NA's
 plot(fragebogen$f4_11)
 plot(knn_fragebogen$f4_11)
 
@@ -192,11 +193,9 @@ plot(knn_fragebogen$f4_11)
 plot(fragebogen$f4_5)
 plot(knn_fragebogen$f4_5)
 
-#mit ~ % NA's
-plot(fragebogen$f4_8)
-plot(knn_fragebogen$f4_8)
-
-
+#mit ~ 25 % NA's
+plot(fragebogen$f6_4)
+plot(knn_fragebogen$f6_4)
 
 
 
@@ -362,36 +361,13 @@ barplot(all_u_ps)
 
 ```{r}
 
-# Annahme: Ab 3 oder kleiner ist Bio für die Probanden wichtig 
-#data.table(knn_fragebogen)
-#bio = knn_fragebogen$f4_13
-#bio_wichtig = bio[bio<=3]
-#bio_wichtig = as.data.table(bio_wichtig)
-
-
-# Leute die Bio mögen und und Demografische Daten
-#bio2 = numericfragebogen[numericfragebogen$f4_13<3,]
-#bio2 = select(bio2, -c(f3_1:f6_9))
-#bio2 = select(bio2, -c(f15_1:f19_10))
-#bio2 = select(bio2, -c(f8:f13_3))
-#nicht brauchbar 
-#bio2 = select(bio2, -c(ID:Ort))
-#bio2 = select(bio2, -c(f23_4))
-#niemand hat das alter seines/ihres 4. Kindes angegeben
-#bio2 = select(bio2, -c(f24))
-
-
-
-
-# das richtige K finden mit Elbow Method 
-
 head(numericfragebogen)
 clusterfragebogen<-numericfragebogen[,c(3,132:122,28)]
 clusterfragebogen
 clusterfragebogen<-clusterfragebogen[,-c(4:9)]
 clusterwithoutNA<-na.omit(clusterfragebogen)
 wss <- 0
-# Elbow
+# Elbow Method
 for (i in 1:15) {
   km.out <- kmeans(clusterwithoutNA, centers = i, nstart = 20, iter.max = 50)
   wss[i] <- km.out$tot.withinss
@@ -411,6 +387,34 @@ plot(clusterwithoutNA[, c("f22", "f1")],
      xlab = "BedeutungBio", ylab = "Häufigkeit im RobinsonClub")
 
 
+#ALTERNATIVE
+
+
+#Frage5
+#1.Filtern nach Personen, welche Bio als wichtig ansehen und weclhe Bio als unwichtig ansehen.
+Biowichtig<-numericfragebogen[f4_13<=3]
+Biounwichtig<-numericfragebogen[f4_13>3]
+#2. die Demografischen Daten aus den filtern
+Biowichtig<-Biowichtig[,c(2,132:122)]
+Biounwichtig<-Biounwichtig[,c(2,132:122)]
+#3. identifizieren des Durschnittlichen Einkommens
+EkBiowichtig<-Biowichtig[,mean(f26,na.rm=TRUE)]
+EkBiounwichtig<-Biounwichtig[,mean(f26,na.rm=TRUE)]
+#4.Durschnittliches Alter 
+AlterBioWichtig<-Biowichtig[,mean(f22, na.rm=TRUE)]
+AlterBioUnwichtig<-Biounwichtig[,mean(f22, na.rm=TRUE)]
+#In welchen der beiden Orten 
+OrtBioWichtig<-Biowichtig[,mean(Ort, na.rm=TRUE)]
+ortBioUnwichtig<-Biounwichtig[,mean(Ort, na.rm=TRUE)]
+#woher kommen die Kunden 
+WohnortBioWichtig<-Biowichtig[,.N,f25_1]
+WohnortBioUnwichtig<-Biounwichtig[,.N,f25_1]
+#Bildungsabschluss
+BildungBioWichtig<-Biowichtig[,mean(f20,na.rm = TRUE)]
+BildungBioUnwichtig<-Biounwichtig[,mean(f20,na.rm=TRUE)]
+#Geschlecht
+GeschlechtBiowichtig<-Biowichtig[,.N,f21]
+GeschlechtBioUnwichtig<-Biounwichtig[,.N,f21]
 
 ```
 
