@@ -145,7 +145,7 @@ Des Weiteren haben die beiden Anfangsdaten "Ort" und "ID" für uns keine Relevan
 
 #drop von den Text Daten
 
-#welche Spalten haben die Endung 'txt'?
+#welche Spalten haben 'txt' in ihrem Namen?
 fragebogendt<-as.data.table(fragebogen)
 fragebogenneu<-fragebogendt[,grep("txt",colnames(fragebogendt))]
 fragebogenneu
@@ -202,32 +202,40 @@ plot(knn_fragebogen$f6_4)
 
 ```
 
-## Frage 1: Welchen Einfluss hat das Essen auf das Wohlbefinden der Gäste? (Stellen- wert des Essens im Vergleich zu den sonstigen Angeboten ROBINSON
+## Frage 1: Welchen Einfluss hat das Essen auf das Wohlbefinden der Gäste? (Stellen- wert des Essens im Vergleich zu den sonstigen Angeboten ROBINSON)
 
 
 ```{r}
+
+essen_wohlbefinden = knn_fragebogen$f4_11
 
 barplot(table(essen_wohlbefinden) , main = "Wichtigkeit des Essens",xlab = "Wichtigkeit", ylab = "Anzahl der befragten Gäste", space = 1, cex.axis = 1, cex.names = 1, cex.lab = 1, cex.main = 1.5)
 
 
 # Essen ist den befragten Gästen sehr wichitg
-MW4.1 <- mean(knn_fragebogen$f4_1)
-MW4.2 <- mean(knn_fragebogen$f4_2)
-MW4.3 <- mean(knn_fragebogen$f4_3)
-MW4.4 <- mean(knn_fragebogen$f4_4)
-MW4.5 <- mean(knn_fragebogen$f4_5)
-MW4.6 <- mean(knn_fragebogen$f4_6)
-MW4.7 <- mean(knn_fragebogen$f4_7)
-MW4.8 <- mean(knn_fragebogen$f4_8)
-MW4.9 <- mean(knn_fragebogen$f4_9)
-MW4.10 <- mean(knn_fragebogen$f4_10)
-MW4.11<- mean(knn_fragebogen$f4_11)
-MW4.12<- mean(knn_fragebogen$f4_12)
-MW4.13 <- mean(knn_fragebogen$f4_13)
-MW4.14 <- mean(knn_fragebogen$f4_14)
 
-MWVektorEssen <- c(MW4.1,MW4.2,MW4.3,MW4.4,MW4.5,MW4.6,MW4.7,MW4.8,MW4.9,MW4.10,MW4.11,MW4.12,MW4.13,MW4.14)
-barplot(MWVektorEssen, main = "Vergleich der Angebote",xlab = "Angebote", ylab = "Wichtigkeit", space = 1, cex.axis = 1, cex.names = 1, cex.lab = 1, cex.main = 1.5)
+Angebote_robinson = cbind(knn_fragebogen$f4_1,
+                          knn_fragebogen$f4_2,
+                          knn_fragebogen$f4_3,
+                          knn_fragebogen$f4_4,
+                          knn_fragebogen$f4_5,
+                          knn_fragebogen$f4_6,
+                          knn_fragebogen$f4_7,
+                          knn_fragebogen$f4_8,
+                          knn_fragebogen$f4_9,
+                          knn_fragebogen$f4_10,
+                          knn_fragebogen$f4_11,
+                          knn_fragebogen$f4_12,
+                          knn_fragebogen$f4_13,
+                          knn_fragebogen$f4_14)
+
+# Arithmetisches Mittel berechnen
+Angebote_robinson_mean = apply(Angebote_robinson, 2, function(x) mean(x))
+
+# Plot
+barplot(Angebote_robinson_mean, main = "Vergleich der Angebote",xlab = "Angebote", ylab = "Wichtigkeit", space = 1, cex.axis = 1, cex.names = 1, cex.lab = 1, cex.main = 1.5)
+
+
 ```
 
 **Angebot 11 (Essen) ist den befragten Gästen am wichtigsten im Vergleich zu dem restlichen Angebot**
@@ -236,6 +244,7 @@ barplot(MWVektorEssen, main = "Vergleich der Angebote",xlab = "Angebote", ylab =
 ## Frage 2: Ist ein Angebot von Bionahrung den Gästen wichtig/erwünscht/erwartet? (Wichtigkeit von Bionahrung)
 ```{r}
 essen_bionahrung = knn_fragebogen$f4_13
+
 barplot(table(essen_bionahrung), main = "Wichtigkeit von Bionahrung",xlab = "Wichtigkeit", ylab = "Anzahl der befragten Gäste", space = 1, cex.axis = 1, cex.names = 1, cex.lab = 1, cex.main = 1.5)
 ```
 
@@ -287,7 +296,7 @@ colnames(bedeutung_bio) <- bedeutung_bio_names
 bedeutung_bio_means = colMeans(bedeutung_bio) 
 
 #plot
-plot(bedeutung_bio_means)
+barplot(bedeutung_bio_means)
 
 # starke Assoziation mit Mittelwert kleiner gleich 2
 
@@ -319,7 +328,6 @@ ps_0 = price_sensitivity[price_sensitivity>0, .N]
 #Wie viele würden mehr als 3 % bezahlen? --> 47 Personen
 ps_3 = price_sensitivity[price_sensitivity>3, .N]
 u_ps_3 = ps_3 * 0.03 
-
 
 #Wie viele würden mehr als 5 % bezahlen? --> 26 Personen
 ps_5 = price_sensitivity[price_sensitivity>5, .N]
@@ -392,7 +400,7 @@ plot(clusterwithoutNA[, c("f22", "f1")],
 
 #Frage5
 #1.Filtern nach Personen, welche Bio als wichtig ansehen und weclhe Bio als unwichtig ansehen.
-Biowichtig<-numericfragebogen[f4_13<=3]
+Biowichtig<-numericfragebogen[f4_13 <= 3]
 Biounwichtig<-numericfragebogen[f4_13>3]
 #2. die Demografischen Daten aus den filtern
 Biowichtig<-Biowichtig[,c(2,132:122)]
@@ -422,20 +430,24 @@ GeschlechtBioUnwichtig<-Biounwichtig[,.N,f21]
 
 ## Frage 6: Bei welchen Lebensmittelarten ist das Angebot von Bio besonders wichtig /unwichtig? (Wichtigkeit von Bio bei unterschiedlichen Lebensmittelarten)
 ```{r}
-MW16.1 <- mean(knn_fragebogen$f16_1)
-MW16.2 <- mean(knn_fragebogen$f16_2)
-MW16.3 <- mean(knn_fragebogen$f16_3)
-MW16.4 <- mean(knn_fragebogen$f16_4)
-MW16.5 <- mean(knn_fragebogen$f16_5)
-MW16.6 <- mean(knn_fragebogen$f16_6)
-MW16.7 <- mean(knn_fragebogen$f16_7)
-MW16.8 <- mean(knn_fragebogen$f16_8)
-MW16.9 <- mean(knn_fragebogen$f16_9)
 
-MWVektorBionahrung <- c(MW16.1,MW16.2,MW16.3,MW16.4,MW16.5,MW16.6,MW16.7,MW16.8,MW16.9)
+l_bio_wichtigkeit = cbind(knn_fragebogen$f16_1,
+                          knn_fragebogen$f16_2,
+                          knn_fragebogen$f16_3,
+                          knn_fragebogen$f16_4,
+                          knn_fragebogen$f16_5,
+                          knn_fragebogen$f16_6,
+                          knn_fragebogen$f16_7,
+                          knn_fragebogen$f16_8,
+                          knn_fragebogen$f16_9)
+
+# Arithmetisches Mittel berechnen
+l_bio_wichtigkeit_mean = apply(l_bio_wichtigkeit, 2, function(x) mean(x))
+
+barplot(l_bio_wichtigkeit_mean, main = "Wichtigkeit von Bio bei unterschiedlichen Lebensmittelarten",xlab = "Lebensmittelkategorien", ylab = "Wichtigkeit", space = 1, cex.axis = 1, cex.names = 1, cex.lab = 1, cex.main = 1)
 
 
-barplot(MWVektorBionahrung, main = "Wichtigkeit von Bio bei unterschiedlichen Lebensmittelarten",xlab = "Lebensmittelkategorien", ylab = "Wichtigkeit", space = 1, cex.axis = 1, cex.names = 1, cex.lab = 1, cex.main = 1)
+
 ```
 
 **Bei Gemüse & Salat (2), Obst (3) und Fleischprodukten (5) ist Bio für die Gäste wichtig. Bei Süßigkeiten (7), Gewürzen (8) und bei den Getränken (9) eher nicht.**
@@ -465,8 +477,8 @@ dt_f12 = as.data.table(cbind(fragebogendt$f12_1,
 #drop na
 dt_f12 = na.omit(dt_f12)
 
+# Bilden der Summe pro Siegel
 dt_f12_count = apply(dt_f12, 2, function(x) sum(x))
-
 
 #plot
 barplot(dt_f12_count)
@@ -490,7 +502,6 @@ H1: Personen mit Kindern bevorzugen Bionahrung eher als Personen ohne Kinder.
 
 # Frage 9
 preferences_bio = as.data.table(fragebogen$f9)
-
 
 # Frage 2
 bio_children = as.data.table(fragebogen$f2)
@@ -581,13 +592,6 @@ t.test(bio_aufschlag, aufschlag_abschrecken)
 # weitere Möglichkeit: einseitiger t.test wo 4 als neutral gilt
 t.test(bio_aufschlag, mu = 4, alternative = 'less')
 # --> p.value<alpha 
-
-
-
-
-
-
-
 
 
 ```
