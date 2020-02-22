@@ -28,6 +28,7 @@ unwichtig? (Wichtigkeit von Bio bei unterschiedlichen Lebensmittelarten)
 ## Packages importieren 
 
 ```{r}
+
 install.packages('tidyverse')
 library(tidyverse)
 
@@ -45,6 +46,9 @@ library(class)
 
 install.packages("factoextra")
 library(factoextra)
+
+install.packages('ggplot2')
+library(ggplot2)
 
 ```
 
@@ -78,6 +82,8 @@ head(fragebogen)
   vorhersagen können anhand des Datensets. 
 
 3. Missing not at random (nonignorable)
+  Die fehlenden Daten haben ein Muster, bsp Probanden antworten auf eine bestimmte Frage nicht, weil Sie eine 
+  bestimmte Eigenschaft aufweisen.
   In diesem Fall können wir keine Aussage oder Prognose für die fehlenden Werte machen. Es 
   ist weder MAR noch MCAR. 
 
@@ -97,24 +103,25 @@ head(fragebogen)
   Es verringert die Varianz der Erhebungsdaten, da diese geglättet werden durch das 
   arithemtische Mittel.
   Extreme Ausreißer können den mean() zu stark beeinflussen und das Ergebniss verzerren. 
-  Hier sind die Zahlen       
-  kategorisch vorgegeben, somit kann es keine größeren Ausreißer geben. 
+  Hier sind die Zahlen kategorisch vorgegeben, somit kann es keine größeren Ausreißer geben. 
   
 3.FEHLENDE DATEN MIT MACHINE LEARNING ALGORITHMEN BESTIMMEN
-  Ein Beispiel für ein einfach zu implementierenden Algorithmus wäre K-Means oder auch KNN 
-  genannt.
+  Ein Beispiel für ein einfach zu implementierenden Algorithmus wäre KNN (K-Nearest-Neighbor).
   Idee hinter KNN: Die fehlenden Werte können mit den Werte die diesem Wert in einem 
   zweidimensionalen Koordinatensystem am nähesten Liegen ermittelt werden. 
-  Kann sehr viel genauer sein als ein einfache means() und es ist sehr sensitiv was 
-  Outliers anbelangt. Allerdings
-  für uns könnten diese Methodik sehr interessant sein, da wir keine Ausreißer im 
+  KNN kann unter bestimmten Vorraussetzungen sehr viel genauer sein als das arithmetische Mittel. Allerdings ist es  
+  sehr sensitiv was Ausreißer anbelangt. 
+  Für uns könnten diese Methodik sehr interessant sein, da wir keine Ausreißer im 
   klassischen Sinne haben können, da
-  die Range schon vorgegeben ist. Dieser Algorithmus kann für stetig und diskrete Daten 
+  die Normierung teilweise schon vorgegeben ist. Dieser Algorithmus kann für stetig und diskrete Daten 
   genutzt werden.
   
+Für die Fragen mit einer Normierung von 1-7 werden wir eine KNN-Imputation durchführen, da wir davon ausgehen können, dass diese Daten zufällig fehlen, da wir keine Muster in den fehlenden Angaben feststellen konnten. Darüber hinaus haben wir in unserem Numerischen Datensatz (numeric_fragebogen) auch Daten mit völlig verschiedenen Normierungen, welches die Gefahr birgt, dass fehlende Daten falsch prognostiziert werden. 
 
 
 ## Welche Spalten sind von NA's betroffen?
+
+Durch die prozentuale Berechnung der NA's pro Spalte, verschaffen wir uns einen Überblick über die fehlenden NA's und haben direkt ein gutes Fundament, welches uns hilt zu entscheiden wie wir mit den fehlenden Werten umgehen können.
 
 ```{r}
 
@@ -130,42 +137,38 @@ perc_na
 ```
 
 ## Welche Spalten (Fragen) können wir ausschließen? 
-Dabei können wir aus dem Fragebogen schon erkennen, das die Fragen 7,14,24 Text als Antwort haben. Des Weiteren sehen wir in der
-Datenstruktur, dass diese Fragen als Factor spezifiziert sind. Wir müssen alle Spalten exkludieren, welche auf 'txt' oder auf 'txt_val' enden. Diese Spalten müssen seperat betrachtet werden.  
+
+Dabei können wir aus dem Fragebogen schon erkennen, dass bestimmte Fragen Freitext als Antwort haben. Wir müssen alle Spalten exkludieren, welche auf 'txt' oder auf 'txt_val' enden. Diese Spalten müssen seperat betrachtet werden da sie keine numerischen Daten enthalten und für Kalkulationen für arithemtische Mittelwerte oder Modalwerte nicht geeignet sind. 
+Des Weiteren haben die beiden Anfangsdaten "Ort" und "ID" für uns keine Relevanz. Die Text-Antworten von Frage 17 und Frage 24 sind ebenfalls vorerst für uns nicht von Interesse. Die Nominal skaliserte Frage 20 muss ebenfalls ausgeschlossen werden. 
 
 ```{r}
 
 #drop von den Text Daten
 
+#welche Spalten haben die Endung 'txt'?
 fragebogendt<-as.data.table(fragebogen)
 fragebogenneu<-fragebogendt[,grep("txt",colnames(fragebogendt))]
 fragebogenneu
 numericfragebogen<-fragebogen[-fragebogenneu]
 
+# einzelne nicht numerische Daten (oder im Fall von f_20 nominal skalierte Daten) werden nochmal herausgefiltert und entfernt 
+numericfragebogen = numericfragebogen[-c(1:2,129,122)]
+#f17_Comment ausschließen
+numericfragebogen$f17_Comment = NULL
 
-num1 = numericfragebogen[-129]
-num2<-num1[-1:-2]
-num3<-num2[-127]
-num4<-num3[-122]
-num5<-num4[-100]
-
-# drop von denen dessen Normierung nicht 1-7 ist
-num6 <- num5
-num6$f1 <- NULL
-num6 <- select(num5, -(f20:f26))
-num6 <- select(num6, -(f11_2:f13_3))
-num6$f2 <- NULL
-num6 <- select(num6, -(f8:f11_1))
-
-# NEUER NAME: df mit ausschließlich ordinalen Skalierung mit der gleichen Normierung von 1-7
-sc_1_7_fragebogen = num6
-
-
+# drop von denen dessen Normierung nicht 1-7 ist 
+sc_1_7_fragebogen = select(numericfragebogen, -c(f21:f25_2,f11_2:f13_3,f8:f11_1))
 
 ```
 
-## KNN Imputation
+Damit haben wir die Daten die eine Normierung von 1-7 für die KNN-Imputation bereitgestellt. NA's von anderen relevanten Spalten werden in den Einzelfällen separat betrachtet und entsprechend manipuliert. Dafür dient vor allem die Variable perc_na, welche Auskunft über den prozentualen Anteil an fehlenden Werte in der entsprechenden Spalte angibt. 
 
+
+
+
+## KNN Imputation
+Im folgenden führen wir die KNN-Imputation für das entpsrechenden Datenset sc_1_7_fragebogen durch. Dabei wird bei der Imputation weitere Spalten mit boolean Werte erstellt. Diese Spalten sind für unsere weiteren Berechnung unerheblich, aus diesem Grund werden sie aus dem Datenset entfernt. Eine neues Datenset ist entstanden, welches wir knn_fragebogen nennen.
+Zum Schluss haben wir noch einen kleinen visuellen Vergleich angestellt, indem wir Spalten aus dem alten Datensatz mit dem knn-bereinigten Datensatz verglichen haben. Dabei ging es vor allem darum, zu schauen ob die KNN-Imputation fehlerhaft war oder bestimmte Ergebnisse völlig außerhalb des Datensatzes sind, beispielsweise neue Ausreißer mit 7 oder 1 erstellt. 
 
 ```{r}
 # skalierung von 1-7 in einem df sc_1_7_fragebogen als knn_fragebogen gespeichert um fehlende Werte durch KNN zu ermitteln (Imputation)
@@ -174,8 +177,7 @@ sc_1_7_fragebogen = num6
 knn_fragebogen = kNN(sc_1_7_fragebogen,k=sqrt(count(fragebogen)))
 
 # zusätzlichen Spalten, die durch den algo knn erstellt wurden, droppen 
-knn_fragebogen = select(knn_fragebogen, -(f3_1_imp:f19_10_imp))
-knn_fragebogen = select(knn_fragebogen, -(f1_imp))
+knn_fragebogen = select(knn_fragebogen, -(f3_3_imp:f19_10_imp))
 
 # double check ob auch wirklich alle NA's imputiert wurden
 sum(is.na(knn_fragebogen))
@@ -183,10 +185,16 @@ sum(is.na(knn_fragebogen))
 # test ob Imputation statistisch erfolgreich
 
 # Zum visuellen Vergleich wie gut KNN Algo funkt hat
-
-essen_wohlbefinden = knn_fragebogen$f4_11
 plot(fragebogen$f4_11)
-plot(essen_wohlbefinden)
+plot(knn_fragebogen$f4_11)
+
+#mit ~ 10 % NA's
+plot(fragebogen$f4_5)
+plot(knn_fragebogen$f4_5)
+
+#mit ~ % NA's
+plot(fragebogen$f4_8)
+plot(knn_fragebogen$f4_8)
 
 
 
@@ -196,11 +204,12 @@ plot(essen_wohlbefinden)
 ```
 
 ## Frage 1: Welchen Einfluss hat das Essen auf das Wohlbefinden der Gäste? (Stellen- wert des Essens im Vergleich zu den sonstigen Angeboten ROBINSON
+
+
 ```{r}
-#KOMMENTAR
-#Prozentualer Anteil an Probanden, die Essen als Wichtig erachten 
 
 barplot(table(essen_wohlbefinden) , main = "Wichtigkeit des Essens",xlab = "Wichtigkeit", ylab = "Anzahl der befragten Gäste", space = 1, cex.axis = 1, cex.names = 1, cex.lab = 1, cex.main = 1.5)
+
 
 # Essen ist den befragten Gästen sehr wichitg
 MW4.1 <- mean(knn_fragebogen$f4_1)
@@ -361,20 +370,45 @@ barplot(all_u_ps)
 
 
 # Leute die Bio mögen und und Demografische Daten
-bio2 = numericfragebogen[numericfragebogen$f4_13<3,]
-bio2 = select(bio2, -c(f3_1:f6_9))
-bio2 = select(bio2, -c(f15_1:f19_10))
-bio2 = select(bio2, -c(f8:f13_3))
+#bio2 = numericfragebogen[numericfragebogen$f4_13<3,]
+#bio2 = select(bio2, -c(f3_1:f6_9))
+#bio2 = select(bio2, -c(f15_1:f19_10))
+#bio2 = select(bio2, -c(f8:f13_3))
 #nicht brauchbar 
-bio2 = select(bio2, -c(ID:Ort))
-bio2 = select(bio2, -c(f23_4))
+#bio2 = select(bio2, -c(ID:Ort))
+#bio2 = select(bio2, -c(f23_4))
 #niemand hat das alter seines/ihres 4. Kindes angegeben
-bio2 = select(bio2, -c(f24))
+#bio2 = select(bio2, -c(f24))
 
 
 
 
 # das richtige K finden mit Elbow Method 
+
+head(numericfragebogen)
+clusterfragebogen<-numericfragebogen[,c(3,132:122,28)]
+clusterfragebogen
+clusterfragebogen<-clusterfragebogen[,-c(4:9)]
+clusterwithoutNA<-na.omit(clusterfragebogen)
+wss <- 0
+# Elbow
+for (i in 1:15) {
+  km.out <- kmeans(clusterwithoutNA, centers = i, nstart = 20, iter.max = 50)
+  wss[i] <- km.out$tot.withinss
+}
+#Scree Plot
+plot(1:15, wss, type = "b", 
+     xlab = "Clusters", 
+     ylab = "Within groups sum of squares")
+k <- 3
+km.out <- kmeans(clusterwithoutNA, centers = k, nstart = 20, iter.max = 50)
+# View 
+km.out
+# Plot von der Häufgkeit wie oft die Kunden schon in RobinsonClub gereist sind und wie Alt sie sind
+plot(clusterwithoutNA[, c("f22", "f1")],
+     col = km.out$cluster,
+     main = paste("k-means clustering of RobinsonClub", k, "clusters"),
+     xlab = "BedeutungBio", ylab = "Häufigkeit im RobinsonClub")
 
 
 
@@ -402,6 +436,39 @@ barplot(MWVektorBionahrung, main = "Wichtigkeit von Bio bei unterschiedlichen Le
 
 **Bei Gemüse & Salat (2), Obst (3) und Fleischprodukten (5) ist Bio für die Gäste wichtig. Bei Süßigkeiten (7), Gewürzen (8) und bei den Getränken (9) eher nicht.**
 
+
+
+## Frage 7: Welche Biosiegel sind den G ̈asten bekannt? (Bekanntheit Biosiegel)
+
+```{r}
+
+#wie viele NA's pro Spalte? 
+na_12_n = perc_na[perc_na$f12_1:perc_na$f12_9]
+
+#dt kreieren
+dt_f12 = as.data.table(cbind(fragebogendt$f12_1,
+                 fragebogendt$f12_2,
+                 fragebogendt$f12_3,
+                 fragebogendt$f12_4,
+                 fragebogendt$f12_5,
+                 fragebogendt$f12_6,
+                 fragebogendt$f12_7,
+                 fragebogendt$f12_8,
+                 fragebogendt$f12_9))
+
+
+
+#drop na
+dt_f12 = na.omit(dt_f12)
+
+dt_f12_count = apply(dt_f12, 2, function(x) sum(x))
+
+
+#plot
+barplot(dt_f12_count)
+
+
+```
 
 
 
