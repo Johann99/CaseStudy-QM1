@@ -507,7 +507,7 @@ colnames(l_bio_wichtigkeit_mean) = c('Milchprodukte',
                                      )
 
 
-barplot(l_bio_wichtigkeit_mean, main = "Wichtigkeit von Bio bei unterschiedlichen Lebensmittelarten", xlab=colnames(l_bio_wichtigkeit_mean), ylab = "Wichtigkeit", space = 0.2, cex.axis = 1, cex.names = 1, cex.lab = 1, cex.main = 1.5, col = "#69b3a2", las=2)
+barplot(l_bio_wichtigkeit_mean, main = "Wichtigkeit von Bio bei unterschiedlichen Lebensmittelarten", ylab = "Wichtigkeit", space = 0.2, cex.axis = 1, cex.names = 1, cex.lab = 1, cex.main = 1.5, col = "#69b3a2", las=2)
 
 
 
@@ -535,16 +535,23 @@ dt_f12 = as.data.table(cbind(fragebogendt$f12_1,
                  fragebogendt$f12_8,
                  fragebogendt$f12_9))
 
-
-
 #drop na
 dt_f12 = na.omit(dt_f12)
 
 # Bilden der Summe pro Siegel
 dt_f12_count = apply(dt_f12, 2, function(x) sum(x))
 
+# dt kreieren
+dt_f12_count = as.data.table(dt_f12_count)
+dt_f12_count_transp = t(dt_f12_count)
+
+#colnames 
+colnames_dt_f12_count = c('Ecovin', 'Biopark', 'Ecoland', 'Gäe', 'Bioland', 'Demeter', 'Naturland', 'Bio', 'Bio Kreis')
+colnames(dt_f12_count_transp) = colnames_dt_f12_count
+
 #plot
-barplot(dt_f12_count)
+barplot(dt_f12_count_transp, main = "Wichtigkeit von Bio bei unterschiedlichen Lebensmittelarten", ylab = "Wichtigkeit", space = 0.2, cex.axis = 1, cex.names = 1, cex.lab = 1, cex.main = 1.5, col ='#69b3a2', las=2)
+abline(h=122, col="blue", lty=3, lwd=4)
 
 
 ```
@@ -675,8 +682,27 @@ marke_robinson = cbind(knn_fragebogen$f3_1,knn_fragebogen$f3_2,knn_fragebogen$f3
 #mean ausrechnen 
 col_means_r=colMeans(marke_robinson)
 
+#columnnames erstellen
+column_names_r = c('Gutes Preis- / Leistungsverhältnis',
+'Umfassendes Wohlfühlangebot',
+'Sportlichkeit',
+'Kinderfreundlichkeit',
+'Hochwertiges Speisenangebot',
+'Abwechslungsreiches Speisenangebot',
+'Einzigartigkeit',
+'Hohe Qualität',
+'Gesundheit',
+'ROBINSON ist „in“',
+'Genuss')
+
+colnames(col_means_r_trans) = column_names_r
+
+
 #plot 
-plot(col_means_r)
+barplot(col_means_r_trans, main = "Was verbinden die Kunden mit der Marke Robinson", ylab = "Bedeutung", col = 'black', las=2)
+abline(h=2.0, col="lightblue", lty=3, lwd=4)
+
+
 
 #weiteren Wert in Betracht ziehen: Modalwert 
 ## mode function definieren 
@@ -687,11 +713,18 @@ modefunc <- function(x){
     return(themode)
 }
 
-#columns
+#modalwerte erechnen
 col_mode_r = apply(marke_robinson, 2, modefunc)
 
+#colnames vergeben
+col_mode_r_transp = t(col_mode_r)
+colnames(col_mode_r_transp) = column_names_r
+
+
 #plot
-plot(col_mode_r)
+barplot(col_mode_r_transp, main = "Was verbinden die Kunden mit der Marke Robinson",ylab = "Bedeutung", col = "black", las=2)
+
+
 
 
 ```
@@ -700,22 +733,56 @@ plot(col_mode_r)
 Was verbinden die Kunden mit der 'Marke' Bio?
 
 ```{r}
-#für marke robinson relevanten spalten zusammenführen 
+#für marke bio relevanten spalten zusammenführen 
 marke_bio = cbind(knn_fragebogen$f15_1,knn_fragebogen$f15_2,knn_fragebogen$f15_3,knn_fragebogen$f15_4,knn_fragebogen$f15_5,knn_fragebogen$f15_6,knn_fragebogen$f15_7,knn_fragebogen$f15_8,knn_fragebogen$f15_9,knn_fragebogen$f15_10, knn_fragebogen$f15_11,knn_fragebogen$f15_12,knn_fragebogen$f15_13,knn_fragebogen$f15_14,knn_fragebogen$f15_15,knn_fragebogen$f15_16)
 
 #mean ausrechnen 
 col_means_b=colMeans(marke_bio)
 
+
+
+#colnames 
+
+column_names_b = c('guter Geschmack',
+'Frische und Reife',
+'gesundheitsbewusste Ernährung',
+'Hochwertige Nahrung',
+'Abwechslungsreiche Nahrung',
+'Sportlichkeit',
+'Individualität',
+'Wohlfühlen',
+'Bio ist „in“',
+'Naturbelassenheit',
+'regionale Herkunft',
+'Genuss',
+'artgerechte Tierhaltung',
+'Ausschluss von Gentechnik',
+'geprüfte Qualität (Gütesiegel)',
+'Gutes Preis- / Leistungsverhältnis')
+
+#colnames
+col_mode_r_transp = t(col_means_b)
+colnames(col_mode_r_transp) = column_names_b
+
+
 #plot 
-plot(col_means_b)
+barplot(col_mode_r_transp, main = "Was verbinden die Kunden mit Robinson", ylab = "Bedeutung", col = "lightgreen", las=2)
+abline(h=2.0, col="black", lty=3, lwd=4)
+
+
 
 #weiteren Wert in Betracht ziehen: Modalwert 
 
 #columns
 col_mode_b = apply(marke_bio, 2, modefunc)
 
+#colnames
+col_mode_b = t(col_mode_b)
+colnames(col_mode_b) = column_names_b
+
 #plot
-plot(col_mode_b)
+barplot(col_mode_b, main = "Was verbinden die Kunden mit Robinson", ylab = "Bedeutung", col = "lightgreen", las=2)
+
 
 
 
@@ -748,9 +815,22 @@ vergleichs_matrix = cbind(col_means_r[1],col_means_b[16],
                           col_means_r[10], col_means_b[9],
                           col_means_r[11], col_means_b[12])
 
+#colnames 
+colnames_v_m = c('Preis- / Leistungsverhältnis','',
+'Umfassendes Wohlfühlangebot','',
+'Sportlichkeit','',
+'Hochwertiges Speisenangebot','',
+'Abwechslungsreiches Speisenangebot','',
+'Einzigartigkeit','',
+'Gesundheit','',
+'Im Trend','',
+'Genuss','')
 
+colnames(vergleichs_matrix) = colnames_v_m
 
 #vergleichsmatrix plotten
+barplot(vergleichs_matrix, main = "Vergleich zwischen Bio und Robinson Club", ylab = "Bedeutung", col = c("lightgreen",'black'), beside = TRUE, las=2)
+
 barplot(vergleichs_matrix)
 
 ```
