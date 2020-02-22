@@ -168,7 +168,7 @@ Damit haben wir die Daten die eine Normierung von 1-7 für die KNN-Imputation be
 
 ## KNN Imputation
 Im folgenden führen wir die KNN-Imputation für das entpsrechenden Datenset sc_1_7_fragebogen durch. Dabei wird bei der Imputation weitere Spalten mit boolean Werte erstellt. Diese Spalten sind für unsere weiteren Berechnung unerheblich, aus diesem Grund werden sie aus dem Datenset entfernt. Eine neues Datenset ist entstanden, welches wir knn_fragebogen nennen.
-Zum Schluss haben wir noch einen kleinen visuellen Vergleich angestellt, indem wir Spalten aus dem alten Datensatz mit dem knn-bereinigten Datensatz verglichen haben. Dabei ging es vor allem darum, zu schauen ob die KNN-Imputation fehlerhaft war oder bestimmte Ergebnisse völlig außerhalb des Datensatzes sind, beispielsweise neue Ausreißer mit 7 oder 1 erstellt. 
+Zum Schluss haben wir noch einen kleinen visuellen Vergleich angestellt, indem wir Spalten aus dem alten Datensatz mit dem knn-bereinigten Datensatz verglichen haben. Dabei ging es vor allem darum, zu schauen ob die KNN-Imputation fehlerhaft war oder bestimmte Ergebnisse völlig außerhalb des Datensatzes sind, beispielsweise neue Ausreißer mit 7 oder 1 erstellt. Dies war nicht der Fall. Es galt trotzdem zu beachten, dass Spalten mit sehr hohem Anteil an fehlenden Werte auch das Potenzial besaßen, Daten stärker zu verzerren als Spalten mit niedrigeren Anteilen. Deshalb setzten wir auch im weiteren Verlauf ein spezielles Augenmerk wenn wir Daten analysieren die einen Hohen Anteil von fehlenden Werte besitzen. (Hoch: > 10 %)
 
 ```{r}
 # skalierung von 1-7 in einem df sc_1_7_fragebogen als knn_fragebogen gespeichert um fehlende Werte durch KNN zu ermitteln (Imputation)
@@ -186,16 +186,36 @@ sum(is.na(knn_fragebogen))
 
 # Zum visuellen Vergleich wie gut KNN Algo funktioniert hat
 #mit ~ 1,3 % NA's
-plot(fragebogen$f4_11)
-plot(knn_fragebogen$f4_11)
+plot(fragebogen$f4_11, col=c("darkblue"), legend = rownames(fragebogen$f4_11), main="Wichtigkeit von Essen", xlab="Datenpunkte", ylab='Beurteilung')
+plot(knn_fragebogen$f4_11, col=c("darkblue"), legend = rownames(fragebogen$f4_11), main="Wichtigkeit von Essen", xlab="Datenpunkte", ylab='Beurteilung')
 
 #mit ~ 10 % NA's
-plot(fragebogen$f4_5)
-plot(knn_fragebogen$f4_5)
+plot(fragebogen$f4_5, col=c("green"), legend = rownames(fragebogen$f4_11), main="Wichtigkeit vom Angebot Atelier", xlab="Datenpunkte", ylab='Beurteilung')
+plot(knn_fragebogen$f4_5, col=c("green"), legend = rownames(fragebogen$f4_11), main="Wichtigkeit vom Angebot Atelier", xlab="Datenpunkte", ylab='Beurteilung')
+
 
 #mit ~ 25 % NA's
-plot(fragebogen$f6_4)
-plot(knn_fragebogen$f6_4)
+plot(fragebogen$f6_4, col=c("orange"), legend = rownames(fragebogen$f4_11), main="Wichtigkeit von Naturbelassenheit bei Essen", xlab="Datenpunkte", ylab='Beurteilung')
+plot(knn_fragebogen$f6_4, col=c("orange"), legend = rownames(fragebogen$f4_11), main="Wichtigkeit von Naturbelassenheit bei Essen", xlab="Datenpunkte", ylab='Beurteilung')
+
+
+
+
+
+
+#ggplot
+#ggplot(knn_fragebogen, aes(f4_11)) + geom_bar(fill = "#0073C2FF") 
+#ggplot(fragebogen, aes(f4_11)) + geom_bar(fill = "#0073C2FF") 
+
+#ggplot
+#ggplot(knn_fragebogen, aes(f4_5)) + geom_bar(fill = "#0073C2FF") 
+#ggplot(fragebogen, aes(f4_5)) + geom_bar(fill = "#0073C2FF")
+
+#ggplot 
+#ggplot(knn_fragebogen, aes(f6_4)) + geom_bar(fill = "#0073C2FF") 
+#ggplot(fragebogen, aes(f6_4)) + geom_bar(fill = "#0073C2FF")
+
+
 
 
 
@@ -209,11 +229,13 @@ plot(knn_fragebogen$f6_4)
 
 essen_wohlbefinden = knn_fragebogen$f4_11
 
-barplot(table(essen_wohlbefinden) , main = "Wichtigkeit des Essens",xlab = "Wichtigkeit", ylab = "Anzahl der befragten Gäste", space = 1, cex.axis = 1, cex.names = 1, cex.lab = 1, cex.main = 1.5)
-
+barplot(table(essen_wohlbefinden) , main = "Wichtigkeit des Essens",xlab = "Wichtigkeit", ylab = "Anzahl der befragten Gäste", space = 0.2, cex.axis = 1, cex.names = 1, cex.lab = 1, cex.main = 1.5, col = "#69b3a2")
 
 # Essen ist den befragten Gästen sehr wichitg
 
+
+
+# neue Matrix erstellen
 Angebote_robinson = cbind(knn_fragebogen$f4_1,
                           knn_fragebogen$f4_2,
                           knn_fragebogen$f4_3,
@@ -229,11 +251,30 @@ Angebote_robinson = cbind(knn_fragebogen$f4_1,
                           knn_fragebogen$f4_13,
                           knn_fragebogen$f4_14)
 
+#colnames vergeben
+colnames(Angebote_robinson) = c('Entertainment',
+                                               'Abendshows',
+                                               'Nite Club',
+                                               'Live-Musik', 
+                                               'Atelier', 
+                                               'Internetverfügbarkeit',
+                                               'Wellfit', 
+                                               'FeelGood',
+                                               'Sportangebote',
+                                               'ROBIN Store',
+                                               'Essen',
+                                               'Gesundes Essen',
+                                               'Ökologische produziertes Essen',
+                                               'Natur, Kultur')
+
 # Arithmetisches Mittel berechnen
 Angebote_robinson_mean = apply(Angebote_robinson, 2, function(x) mean(x))
 
 # Plot
-barplot(Angebote_robinson_mean, main = "Vergleich der Angebote",xlab = "Angebote", ylab = "Wichtigkeit", space = 1, cex.axis = 1, cex.names = 1, cex.lab = 1, cex.main = 1.5)
+barplot(Angebote_robinson_mean , main = "Vergleich von anderen Angeboten", xlab = colnames(Angebote_robinson_mean), ylab = "Wichtigkeit", space = 0.2, cex.axis = 1, cex.names = 1, cex.lab = 1, cex.main = 1.5, col = rgb(0.8,0.1,0.1,0.6), las=2)
+
+
+
 
 
 ```
@@ -243,9 +284,11 @@ barplot(Angebote_robinson_mean, main = "Vergleich der Angebote",xlab = "Angebote
 
 ## Frage 2: Ist ein Angebot von Bionahrung den Gästen wichtig/erwünscht/erwartet? (Wichtigkeit von Bionahrung)
 ```{r}
+
 essen_bionahrung = knn_fragebogen$f4_13
 
-barplot(table(essen_bionahrung), main = "Wichtigkeit von Bionahrung",xlab = "Wichtigkeit", ylab = "Anzahl der befragten Gäste", space = 1, cex.axis = 1, cex.names = 1, cex.lab = 1, cex.main = 1.5)
+barplot(table(essen_bionahrung), main = "Wichtigkeit von Bionahrung", xlab = 'Wichtigkeit', ylab = "Anzahl der Befragten", space = 0.2, cex.axis = 1, cex.names = 1, cex.lab = 1, cex.main = 1.5, col = rgb(0.8,0.1,0.1,0.6), las=1)
+
 ```
 
 
@@ -296,9 +339,10 @@ colnames(bedeutung_bio) <- bedeutung_bio_names
 bedeutung_bio_means = colMeans(bedeutung_bio) 
 
 #plot
-barplot(bedeutung_bio_means)
+barplot(bedeutung_bio_means , main = "Was bedeutet Bio für die Gäste?", xlab = colnames(Angebote_robinson_mean), ylab = "Bedeutung", space = 0.2, cex.axis = 1, cex.names = 1, cex.lab = 1, cex.main = 1.5, col = rgb(0.8,0.1,0.1,0.6), las=2)
+abline(h=2.0, col="blue", lty=3, lwd=4)
 
-# starke Assoziation mit Mittelwert kleiner gleich 2
+# starke Assoziation mit Mittelwert kleiner gleich 2 deshalb die Linie
 
 
 
@@ -346,21 +390,23 @@ ps_20 = price_sensitivity[price_sensitivity>20, .N]
 u_ps_20 = ps_20 * 0.2
 
 #Ergebnisse in einen Vektor packen
-all_ps = c(ps_3, ps_5, ps_10, ps_15, ps_20)
-all_u_ps = c(u_ps_3,u_ps_5,u_ps_10,u_ps_15,u_ps_20)
+all_ps = as.data.table(c(ps_3, ps_5, ps_10, ps_15, ps_20))
+all_u_ps = as.data.table(c(u_ps_3,u_ps_5,u_ps_10,u_ps_15,u_ps_20))
 
-#barplot in absoluten Zahlen
-barplot(all_ps)
-#barplot in Prozenten, wir müssen davon ausgehen, dass diejenigen die nicht geantwortet haben, keinen Aufschlag zahlen würden
-barplot(all_ps/length(numericfragebogen$f17))
+all_ps_transpose = t(all_ps)
+all_ps_u_transpose = t(all_u_ps)
+
+#colnames 
+colnames_all_ps_transpose = c('>3%','>5%','>10%','>15%','>20%')
+colnames(all_ps_transpose) = colnames_all_ps_transpose
+
+colnames(all_ps_u_transpose) = colnames_all_ps_transpose
+
+#barplot in Prozentualer Anteil 
+barplot(all_ps_transpose/length(numericfragebogen$f17), main = "Anzahl der Gäste die Aufschlag zahlen würden", ylab = "Anzahl", space = 0.2, cex.axis = 1, cex.names = 1, cex.lab = 1, cex.main = 1.5, col = rgb(0.8,0.1,0.1,0.6), las=1)
 
 #barplot Umsatz für jede Erhöhung --> Zeigt welche Prozenterhöhung sich lohnen würde wenn man die prozentuale Erhöhung und die Kaufbereitschaft der Kunden betrachtet
-barplot(all_u_ps)
-
-
-
-
-
+barplot(all_ps_u_transpose , main = "Anzahl multipliziert mit dem Aufschlag", ylab = "Anzahl", space = 0.2, cex.axis = 1, cex.names = 1, cex.lab = 1, cex.main = 1.5, col = rgb(0.8,0.1,0.1,0.6), las=1)
 
 
 ```
@@ -444,7 +490,24 @@ l_bio_wichtigkeit = cbind(knn_fragebogen$f16_1,
 # Arithmetisches Mittel berechnen
 l_bio_wichtigkeit_mean = apply(l_bio_wichtigkeit, 2, function(x) mean(x))
 
-barplot(l_bio_wichtigkeit_mean, main = "Wichtigkeit von Bio bei unterschiedlichen Lebensmittelarten",xlab = "Lebensmittelkategorien", ylab = "Wichtigkeit", space = 1, cex.axis = 1, cex.names = 1, cex.lab = 1, cex.main = 1)
+#tranpose und dt kreieren
+l_bio_wichtigkeit_mean = as.data.table(l_bio_wichtigkeit_mean)
+l_bio_wichtigkeit_mean = t(l_bio_wichtigkeit_mean)
+
+#colnames
+colnames(l_bio_wichtigkeit_mean) = c('Milchprodukte',
+                                     'Gemüse',
+                                     'Obst',
+                                     'Fischprodukte',
+                                     'Fleischprodukte', 
+                                     'Backwaren',
+                                     'Süßigkeiten',
+                                     'Gewürze',
+                                     'Getränke'
+                                     )
+
+
+barplot(l_bio_wichtigkeit_mean, main = "Wichtigkeit von Bio bei unterschiedlichen Lebensmittelarten", xlab=colnames(l_bio_wichtigkeit_mean), ylab = "Wichtigkeit", space = 0.2, cex.axis = 1, cex.names = 1, cex.lab = 1, cex.main = 1.5, col = "#69b3a2", las=2)
 
 
 
