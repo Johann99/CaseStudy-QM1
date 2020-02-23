@@ -182,8 +182,6 @@ knn_fragebogen = select(knn_fragebogen, -(f3_3_imp:f19_10_imp))
 # double check ob auch wirklich alle NA's imputiert wurden
 sum(is.na(knn_fragebogen))
 
-# test ob Imputation statistisch erfolgreich
-
 # Zum visuellen Vergleich wie gut KNN Algo funktioniert hat
 #mit ~ 1,3 % NA's
 plot(fragebogen$f4_11, col=c("darkblue"), legend = rownames(fragebogen$f4_11), main="Wichtigkeit von Essen", xlab="Datenpunkte", ylab='Beurteilung')
@@ -394,32 +392,32 @@ barplot(all_ps_u_transpose , main = "Anzahl multipliziert mit dem Aufschlag", yl
 
 ```{r}
 
-numericfragebogen = as.data.table(numericfragebogen)
-
-head(numericfragebogen)
-clusterfragebogen<-numericfragebogen[,c(3,132:122,28)]
-clusterfragebogen
-clusterfragebogen<-clusterfragebogen[,-c(4:9)]
-clusterwithoutNA<-na.omit(clusterfragebogen)
-wss <- 0
-# Elbow Method
-for (i in 1:15) {
-  km.out <- kmeans(clusterwithoutNA, centers = i, nstart = 20, iter.max = 50)
-  wss[i] <- km.out$tot.withinss
-}
-#Scree Plot
-plot(1:15, wss, type = "b", 
-     xlab = "Clusters", 
-     ylab = "Within groups sum of squares")
-k <- 3
-km.out <- kmeans(clusterwithoutNA, centers = k, nstart = 20, iter.max = 50)
-# View 
-km.out
-# Plot von der Häufgkeit wie oft die Kunden schon in RobinsonClub gereist sind und wie Alt sie sind
-plot(clusterwithoutNA[, c("f22", "f1")],
-     col = km.out$cluster,
-     main = paste("k-means clustering of RobinsonClub", k, "clusters"),
-     xlab = "BedeutungBio", ylab = "Häufigkeit im RobinsonClub")
+# numericfragebogen = as.data.table(numericfragebogen)
+# 
+# head(numericfragebogen)
+# clusterfragebogen<-numericfragebogen[,c(3,132:122,28)]
+# clusterfragebogen
+# clusterfragebogen<-clusterfragebogen[,-c(4:9)]
+# clusterwithoutNA<-na.omit(clusterfragebogen)
+# wss <- 0
+# # Elbow Method
+# for (i in 1:15) {
+#   km.out <- kmeans(clusterwithoutNA, centers = i, nstart = 20, iter.max = 50)
+#   wss[i] <- km.out$tot.withinss
+# }
+# #Scree Plot
+# plot(1:15, wss, type = "b", 
+#      xlab = "Clusters", 
+#      ylab = "Within groups sum of squares")
+# k <- 3
+# km.out <- kmeans(clusterwithoutNA, centers = k, nstart = 20, iter.max = 50)
+# # View 
+# km.out
+# # Plot von der Häufgkeit wie oft die Kunden schon in RobinsonClub gereist sind und wie Alt sie sind
+# plot(clusterwithoutNA[, c("f22", "f1")],
+#      col = km.out$cluster,
+#      main = paste("k-means clustering of RobinsonClub", k, "clusters"),
+#      xlab = "BedeutungBio", ylab = "Häufigkeit im RobinsonClub")
 
 
 #ALTERNATIVE
@@ -586,12 +584,6 @@ kinder_bio_all$na_count <- apply(kinder_bio_all, 1, function(x) sum(is.na(x)))
 kinder_bio_all =  as.data.table(kinder_bio_all) 
 colnames(kinder_bio_all) = c('1Ki','2Ki','3Ki','4Ki','bio','na_count')
 
-
-
-# definiert df mit und ohne Kinder
-# keine_kinder_mögen = kinder_bio_all[kinder_bio_all$na_count==4 & kinder_bio_all$bio < 3]
-# keine_kinder_n_mögen = kinder_bio_all[kinder_bio_all$na_count==4 & kinder_bio_all$bio > 2]
-
 # kinder und keine kinder und dann mittelwert von bio ermitteln 
 keine_kinder = kinder_bio_all[kinder_bio_all$na_count==4]
 kinder = kinder_bio_all[kinder_bio_all$na_count!=4]
@@ -626,16 +618,19 @@ t.test(kinder_bio, keine_kinder_bio)
 
 ```{r}
 # daten und var spezifizieren 
-bio_aufschlag = knn_fragebogen$f18_2
+bio_aufschlag = as.matrix(knn_fragebogen$f18_2)
 
 #plot --> Erkennbar dass Bereitschaft da wäre
-hist(bio_aufschlag)
-
+hist(bio_aufschlag, main = "Kaufbereitschaft von Bionahrung",xlab = 'Wichtigkeit' ,ylab = "Anzahl der Gäste", col ='#69b3a2', las=2, breaks=7)
 
 # daten und var spezifizieren 
-aufschlag_abschrecken = knn_fragebogen$f18_9
+aufschlag_abschrecken = as.matrix(knn_fragebogen$f18_9)
 #plot
-hist(aufschlag_abschrecken)
+
+hist(aufschlag_abschrecken, main = "Abschreckung durch Aufschlag bei Bionahrung",xlab = 'Wichtigkeit' ,ylab = "Anzahl der Gäste", col ='#69b3a2', las=2, breaks = 7)
+
+
+
 
 # t.test für statistischen Nachweis
 t.test(bio_aufschlag, aufschlag_abschrecken)
@@ -654,7 +649,7 @@ t.test(bio_aufschlag, mu = 4, alternative = 'less')
 
 ## 3 Hypothese: Bionahrung besitzt das Potenzial ROBINSON als Marke zu st ̈arken.
 
-# Was verbinden die Kunden mit der Marken Robinson?
+### Was verbinden die Kunden mit der Marken Robinson?
 
 ```{r}
 #für marke robinson relevanten spalten zusammenführen 
@@ -665,23 +660,26 @@ col_means_r=colMeans(marke_robinson)
 
 #columnnames erstellen
 column_names_r = c('Gutes Preis- / Leistungsverhältnis',
-'Umfassendes Wohlfühlangebot',
-'Sportlichkeit',
-'Kinderfreundlichkeit',
-'Hochwertiges Speisenangebot',
-'Abwechslungsreiches Speisenangebot',
-'Einzigartigkeit',
-'Hohe Qualität',
-'Gesundheit',
-'ROBINSON ist „in“',
-'Genuss')
+                   'Umfassendes Wohlfühlangebot',
+                   'Sportlichkeit',
+                   'Kinderfreundlichkeit',
+                   'Hochwertiges Speisenangebot',
+                   'Abwechslungsreiches Speisenangebot',
+                   'Einzigartigkeit',
+                   'Hohe Qualität',
+                   'Gesundheit',
+                   'ROBINSON ist „in“',
+                   'Genuss')
 
-colnames(col_means_r_trans) = column_names_r
+#colnames vergeben
+col_means_r = as.data.table(col_means_r)
+col_means_r_transp = t(col_means_r)
+colnames(col_means_r_transp) = column_names_r
 
 
 #plot 
-barplot(col_means_r_trans, main = "Was verbinden die Kunden mit der Marke Robinson", ylab = "Bedeutung", col = 'black', las=2)
-abline(h=2.0, col="lightblue", lty=3, lwd=4)
+barplot(col_means_r_transp, main = "Was verbinden die Kunden mit der Marke Robinson", ylab = "Bedeutung", col = 'black', las=2)
+abline(h=2.0, col="lightgreen", lty=3, lwd=4)
 
 
 
@@ -806,12 +804,14 @@ colnames_v_m = c('Preis- / Leistungsverhältnis','',
 'Im Trend','',
 'Genuss','')
 
-colnames(vergleichs_matrix) = colnames_v_m
+
+#colnames vergeben
+vergleichs_matrix_dt = as.matrix(vergleichs_matrix)
+colnames(vergleichs_matrix_dt) = colnames_v_m
 
 #vergleichsmatrix plotten
-barplot(vergleichs_matrix, main = "Vergleich zwischen Bio und Robinson Club", ylab = "Bedeutung", col = c("lightgreen",'black'), beside = TRUE, las=2, cex.axis=.75, cex.names=.75)
+barplot(vergleichs_matrix_dt, main = "Vergleich zwischen Bio und Robinson Club", ylab = "Bedeutung", col = c("lightgreen",'black'), beside = TRUE, las=2, cex.axis=.75, cex.names=.75)
 
-barplot(vergleichs_matrix)
 
 ```
 
