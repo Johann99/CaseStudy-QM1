@@ -42,10 +42,6 @@ install.packages('data.table')
 library(data.table)
 install.packages('VIM')
 library(VIM)
-install.packages('class')
-library(class)
-install.packages("factoextra")
-library(factoextra)
 ```
 
 ## Importieren der Daten für einen ersten Überblick
@@ -686,8 +682,30 @@ barplot(vergleichs_matrix_dt, main = "Vergleich zwischen Bio und Robinson Club",
 ```
 
 
+```{r}
 
+# dt
+marke_robinson_dt = as.data.frame(marke_robinson)
+marke_bio_dt = as.data.frame(marke_bio)
+#t.test von den Paarvergleichen
+#t.test Preis- / Leistungsverhältnis
+t.test(marke_robinson_dt$V1,marke_bio_dt$V16)
+#t.test Umfassendes Wohlfühlangebot
+t.test(marke_robinson_dt$V2,marke_bio_dt$V8)
+#t.test Sportlichkeit
+t.test(marke_robinson_dt$V3,marke_bio_dt$V6)
+#t.test Hochwertiges Speisenangebot
+t.test(marke_robinson_dt$V5,marke_bio_dt$V4)
+#t.test Abwechslungsreiches Speisenangebot
+t.test(marke_robinson_dt$V6,marke_bio_dt$V5)
+#t.test Gesundheit
+t.test(marke_robinson_dt$V9,marke_bio_dt$V3)
+#t.test Im Trend --> p.value > alpha 
+t.test(marke_robinson_dt$V10,marke_bio_dt$V9)
+#t.test Genuss
+t.test(marke_robinson_dt$V11,marke_bio_dt$V12)
 
+```
 
 
 
