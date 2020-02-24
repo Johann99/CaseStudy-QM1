@@ -556,7 +556,8 @@ t.test(aufschlag_abschrecken, mu = 4, alternative = 'greater')
 Zur Prüfung dieser Hypothese haben wir uns entschieden, die Hypothese in zwei Fragen aufzuteilen und diese dann am Ende in einem Säulendiagramm vergleichend gegenüberzustellen.  
 
 ### Frage 1: Was verbinden die Kunden mit der Marken Robinson?
-Es wird zunächst Frage 3 ("Was verbinden Sie mit der Marke ROBINSON?") betrachtet, um zu schauen, was die Kunden derzeitig mit Robinson verbinden.
+Es wird zunächst Frage 3 ("Was verbinden Sie mit der Marke ROBINSON?") betrachtet, um zu schauen, was die Kunden derzeitig mit Robinson verbinden.  
+Hierbei errechnen wir die Mittelwerte der Aussagen von Frage 3 und vergleichen diese in einem Säulendiagramm. Zudem berechnen wir auch noch die einzelnen Modalwerte und stellen auch diese in einem Säulendiagramm dar. 
 ```{r}
 # Neue Matrix
 marke_robinson = cbind(knn_fragebogen$f3_1,knn_fragebogen$f3_2,knn_fragebogen$f3_3,knn_fragebogen$f3_4,knn_fragebogen$f3_5,knn_fragebogen$f3_6,knn_fragebogen$f3_7,knn_fragebogen$f3_8,knn_fragebogen$f3_9,knn_fragebogen$f3_10, knn_fragebogen$f3_11)
@@ -639,6 +640,8 @@ colnames(col_mode_b) = column_names_b
 barplot(col_mode_b, main = "Was verbinden die Kunden mit Robinson", ylab = "Bedeutung", col = "lightgreen", las=2)
 ```
 
+Nun überlegen wir, welche Attribute der beiden Fragen einen Vergleich zulassen. Beispielsweise lässt sich das "umfassende Wohlfühlangebot" (3.2) mit "Wohlfühlen" (15.8) vergleichen. Nachfolgend sind einmal alle Attribute der Frage 3 mit den zugehörigen / vergleichbaren Attributen der Frage 15 aufgelistet.    
+
 Welche Attribute lassen einen Vergleich zu? 
 
 Gutes Preis- / Leistungsverhältnis: f3_1 = f15_16
@@ -652,6 +655,8 @@ Hohe Qualität: f3_8 = NA
 Gesundheit: f3_9 = f15_3
 Im Trend: f3_10 = f15_9
 Genuss: f3_11 = f15_12
+
+Diese vergleichbaren Daten werden nun zusammengeführt und in einem Säulendiagramm miteinander verglichen.
 
 ```{r}
 # vergleichsdaten zusammenführen 
@@ -683,7 +688,6 @@ barplot(vergleichs_matrix_dt, main = "Vergleich zwischen Bio und Robinson Club",
 
 
 ```{r}
-
 # dt
 marke_robinson_dt = as.data.frame(marke_robinson)
 marke_bio_dt = as.data.frame(marke_bio)
@@ -710,10 +714,13 @@ t.test(marke_robinson_dt$V11,marke_bio_dt$V12)
 
 
 
+Außerdem kann auch Frage 18 und Aussage 4 ("Die Marke ROBINSON steht für hohe Qualität, da bedarf es keiner weiteren Siegel") zur Prüfung der Hypothese herangezogen werden.  
+Zunächst stellen wir das Ergebnis der Aussage 4 in einem Histogramm dar. Außerdem kann dann noch ein einseitiger T-Test durchgeführt werden, bei dem geschaut wird, ob der Mittelwert der Aussage 4 signifikant vom Wert 4 (= neutral) abweicht. Dabei legen wir zudem fest, dass der Mittelwert signifikant nach unten abweichen müsste, damit wir unsere Alternativhypothese annehmen könnten und ein signifikanter Bedarf an Gütesiegeln vorliegt.  
+Nullhypothese:       H0 gleich 4
+Alternativhypothese: H1 ungleich 4
 
 
-
-# Weitere Datenanalysen  
+### Weitere Datenanalysen  
 
 ```{r}
 # besteht überhaupt ein Bedarf an weiteren Gütesiegeln?
@@ -724,3 +731,9 @@ hist(bedarf_an_gs)
 t.test(bedarf_an_gs, mu = 4, alternative = 'less')
 #p.value < alpha --> signifikanter Bedarf an Gütesiegeln
 ```
+
+
+# Fazit
+
+**Ist die Einführung von Bionahrung beim Robinson Club aus betriebswirtschaftlicher Sicht strategisch sinvoll?**  
+
