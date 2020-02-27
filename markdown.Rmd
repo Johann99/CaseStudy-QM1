@@ -41,15 +41,6 @@ library(data.table)
 install.packages('VIM')
 library(VIM)
 
-#install.packages('class')
-#library(class)
-
-#install.packages("factoextra")
-#library(factoextra)
-
-#install.packages('ggplot2')
-#library(ggplot2)
-
 ```
 
 
@@ -142,9 +133,7 @@ Dabei können wir aus dem Fragebogen schon erkennen, dass bestimmte Fragen Freit
 Des Weiteren haben die beiden Anfangsdaten "Ort" und "ID" für uns keine Relevanz. Die Text-Antworten von Frage 17 und Frage 24 sind ebenfalls vorerst für uns nicht von Interesse. Die Nominal skaliserte Frage 20 muss ebenfalls ausgeschlossen werden. 
 
 ```{r}
-
 #drop von den Text Daten
-
 #welche Spalten haben 'txt' in ihrem Namen?
 fragebogendt<-as.data.table(fragebogen)
 fragebogenneu<-fragebogendt[,grep("txt",colnames(fragebogendt))]
@@ -207,10 +196,6 @@ plot(knn_fragebogen$f6_4, col=c("orange"), legend = rownames(fragebogen$f4_11), 
 essen_wohlbefinden = knn_fragebogen$f4_11
 
 barplot(table(essen_wohlbefinden) , main = "Wichtigkeit des Essens",xlab = "Wichtigkeit", ylab = "Anzahl der befragten Gäste", space = 0.2, cex.axis = 1, cex.names = 1, cex.lab = 1, cex.main = 1.5, col = "#69b3a2")
-
-# Essen ist den befragten Gästen sehr wichitg
-
-
 
 # neue Matrix erstellen
 Angebote_robinson = cbind(knn_fragebogen$f4_1,
@@ -392,7 +377,7 @@ barplot(all_ps_u_transpose , main = "Anzahl multipliziert mit dem Aufschlag", yl
 
 ```{r}
 
-# numericfragebogen = as.data.table(numericfragebogen)
+#numericfragebogen = as.data.table(numericfragebogen)
 # 
 # head(numericfragebogen)
 # clusterfragebogen<-numericfragebogen[,c(3,132:122,28)]
@@ -423,31 +408,29 @@ barplot(all_ps_u_transpose , main = "Anzahl multipliziert mit dem Aufschlag", yl
 #ALTERNATIVE
 
 
-# #Frage5
-# #1.Filtern nach Personen, welche Bio als wichtig ansehen und weclhe Bio als unwichtig ansehen.
-# Biowichtig<-numericfragebogen[f4_13 <= 3]
-# Biounwichtig<-numericfragebogen[f4_13>3]
-# #2. die Demografischen Daten aus den filtern
-# Biowichtig<-Biowichtig[,c(2,132:122)]
-# Biounwichtig<-Biounwichtig[,c(2,132:122)]
-# #3. identifizieren des Durschnittlichen Einkommens
-# EkBiowichtig<-Biowichtig[,mean(f26,na.rm=TRUE)]
-# EkBiounwichtig<-Biounwichtig[,mean(f26,na.rm=TRUE)]
-# #4.Durschnittliches Alter 
-# AlterBioWichtig<-Biowichtig[,mean(f22, na.rm=TRUE)]
-# AlterBioUnwichtig<-Biounwichtig[,mean(f22, na.rm=TRUE)]
-# #In welchen der beiden Orten 
-# OrtBioWichtig<-Biowichtig[,mean(Ort, na.rm=TRUE)]
-# ortBioUnwichtig<-Biounwichtig[,mean(Ort, na.rm=TRUE)]
-# #woher kommen die Kunden 
-# WohnortBioWichtig<-Biowichtig[,.N,f25_1]
-# WohnortBioUnwichtig<-Biounwichtig[,.N,f25_1]
-# #Bildungsabschluss
-# BildungBioWichtig<-Biowichtig[,mean(f20,na.rm = TRUE)]
-# BildungBioUnwichtig<-Biounwichtig[,mean(f20,na.rm=TRUE)]
-# #Geschlecht
-# GeschlechtBiowichtig<-Biowichtig[,.N,f21]
-# GeschlechtBioUnwichtig<-Biounwichtig[,.N,f21]
+ Biowichtig<-fragebogendt[f4_13 <= 3]
+ Biounwichtig<-fragebogendt[f4_13>3]
+ #2. die Demografischen Daten aus den filtern
+ Biowichtig<-Biowichtig[,c(2,144:134)]
+ Biounwichtig<-Biounwichtig[,c(2,144:134)]
+ #3. identifizieren des Durschnittlichen Einkommens
+ EkBiowichtig<-Biowichtig[,mean(f26,na.rm=TRUE)]
+ EkBiounwichtig<-Biounwichtig[,mean(f26,na.rm=TRUE)]
+ #4.Durschnittliches Alter 
+ AlterBioWichtig<-Biowichtig[,mean(f22, na.rm=TRUE)]
+ AlterBioUnwichtig<-Biounwichtig[,mean(f22, na.rm=TRUE)]
+ #In welchen der beiden Orten 
+ OrtBioWichtig<-Biowichtig[,mean(Ort, na.rm=TRUE)]
+ ortBioUnwichtig<-Biounwichtig[,mean(Ort, na.rm=TRUE)]
+ #woher kommen die Kunden 
+ WohnortBioWichtig<-Biowichtig[,.N,f25_1]
+ WohnortBioUnwichtig<-Biounwichtig[,.N,f25_1]
+ #Bildungsabschluss
+ BildungBioWichtig<-Biowichtig[,mean(f20,na.rm = TRUE)]
+ BildungBioUnwichtig<-Biounwichtig[,mean(f20,na.rm=TRUE)]
+ #Geschlecht
+ GeschlechtBiowichtig<-Biowichtig[,.N,f21]
+ GeschlechtBioUnwichtig<-Biounwichtig[,.N,f21]
 
 ```
 
@@ -600,7 +583,7 @@ mean_k_b = mean(kinder_bio)
 mean_kk_b = mean(data.matrix(keine_kinder_bio)) #mean funktioniert nicht immer mit dt
 
 # t.test durchführen
-t.test(kinder_bio, keine_kinder_bio)
+t.test(kinder_bio, keine_kinder_bio) 
 
 #--> Können H0 nicht verwerfen da p.value > alpha deshalb müssen wir bei der H0 hypo bleiben
 
@@ -630,14 +613,16 @@ aufschlag_abschrecken = as.matrix(knn_fragebogen$f18_9)
 hist(aufschlag_abschrecken, main = "Abschreckung durch Aufschlag bei Bionahrung",xlab = 'Wichtigkeit' ,ylab = "Anzahl der Gäste", col ='#69b3a2', las=2, breaks = 7)
 
 
-
-
-# t.test für statistischen Nachweis
-t.test(bio_aufschlag, aufschlag_abschrecken)
-
+#H0: wird nicht abgelehnt sondern einfach nur H1 bewiesen
 # weitere Möglichkeit: einseitiger t.test wo 4 als neutral gilt
 t.test(bio_aufschlag, mu = 4, alternative = 'less')
 # --> p.value<alpha 
+
+# alternative Betrachtung 
+t.test(aufschlag_abschrecken, mu = 4, alternative = 'greater')
+# --> p.value<alpha 
+
+
 
 
 ```
@@ -816,8 +801,14 @@ barplot(vergleichs_matrix_dt, main = "Vergleich zwischen Bio und Robinson Club",
 ```
 
 
+## Mittelwertvergleiche 
+
+```{r}
 
 
+
+
+```
 
 
 
