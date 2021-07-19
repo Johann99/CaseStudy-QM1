@@ -1,4 +1,4 @@
-# Fallstudie-Git
+# Fallstudie-QM1
 
 **Statistical Data Analysis Course:**
 
